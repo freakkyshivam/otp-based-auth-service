@@ -36,6 +36,53 @@ If you did not request this, please ignore this email.`,
   };
 }
 
+export function welcomeTemplate({
+  name,
+}: {
+  name?: string;
+}) {
+  return {
+    subject: "Welcome to our platform 🎉",
+
+    text: `Hello ${name ?? "User"},
+
+Welcome! Your account has been successfully created.
+
+We're excited to have you on board. You can now explore all features of our platform.
+
+If you did not create this account, please contact our support team immediately.
+`,
+
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2>Welcome 🎉</h2>
+
+        <p>Hello ${name ?? "User"},</p>
+
+        <p>
+          Your account has been <strong>successfully created</strong>.
+          We're excited to have you on board!
+        </p>
+
+        <p>
+          You can now explore all features and start using the platform right away.
+        </p>
+
+        <p>
+          If you did not create this account, please contact our support team immediately.
+        </p>
+
+        <hr />
+
+        <p style="font-size: 12px; color: #777;">
+          This is an automated message. Please do not reply.
+        </p>
+      </div>
+    `,
+  };
+}
+
+
 
 export function passwordResetTemplate({
   name,

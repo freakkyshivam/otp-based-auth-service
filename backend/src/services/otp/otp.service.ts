@@ -5,7 +5,7 @@ import { OTP_TTL,MAX_OTP_ATTEMPTS,getOtpKey } from './otp.constant.js'
 
 import {SendOtpInput,VerifyOtpInput,VerifyOtpResult} from "./otp.types.js"
 
-export async function sendOtp({
+export async function storeOtpInRedis({
     identifier,
     purpose,
     ttl = OTP_TTL
@@ -28,7 +28,7 @@ export async function sendOtp({
     return otp;
 }
 
-export async function verifyOtp({
+export async function verifyOtpFromRedis({
   identifier,
   purpose,
   otp,

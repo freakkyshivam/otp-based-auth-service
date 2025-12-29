@@ -9,6 +9,10 @@
     /* Paths */
     "rootDir": "./src",
     "outDir": "./dist",
+     
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     /* Strictness */
     "strict": true,

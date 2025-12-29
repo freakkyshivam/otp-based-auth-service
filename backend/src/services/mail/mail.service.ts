@@ -4,7 +4,8 @@ import {
    accountVerificationTemplate,
    passwordResetTemplate,
    passwordResetAlertTemplate,
-   twoFactorAuthTemplate
+   twoFactorAuthTemplate,
+   welcomeTemplate
    } from "./mail.templates.js";
 
  
@@ -15,6 +16,23 @@ export async function sendRegisterAccountVerifyEmail(
   otp: string
 ) {
   const template = accountVerificationTemplate({ name, otp });
+
+  const info = await transporter.sendMail({
+    from: `"Shivam Chaudhary" <${process.env.SENDER_EMAIL}>`,
+    to: email,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+  });
+
+  return info.messageId;
+}
+
+export async function sendWelcomeEmail(
+  name: string | undefined,
+  email: string,
+) {
+  const template = welcomeTemplate({ name });
 
   const info = await transporter.sendMail({
     from: `"Shivam Chaudhary" <${process.env.SENDER_EMAIL}>`,

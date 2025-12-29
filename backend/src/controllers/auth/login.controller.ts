@@ -1,0 +1,168 @@
+import { response, type Request, type Response } from "express";
+import argon2 from "argon2";
+import { and, eq, ne } from "drizzle-orm";
+
+import db from "../../db/db.js";
+import Users from "../../db/schema/users.schema.js";
+import { UserSessions } from "../../db/schema/user_sessions.schema.js";
+
+import { loginValidation } from "../../validation/validation.js";
+
+import { findUserByEmail } from "../../services/user.service.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../utils/token.js";
+
+import crypto from "node:crypto";
+import { cookieOptions } from "../../utils/cookiesAption.js";
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const validationResult = await loginValidation.safeParseAsync(req.body);
+
+    if (validationResult.error) {
+      return res.status(400).json({
+        success: false,
+        msg: "Please enter valid details",
+        error: validationResult.error,
+      });
+    }
+
+    const { email, password } = validationResult.data;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        msg: "Name , email and password are required",
+      });
+    }
+
+    const existingUser = await findUserByEmail(email);
+
+    if (!existingUser) {
+      return res.status(400).json({
+        success: false,
+        msg: `User with this email ${email} is not exists in database`,
+      });
+    }
+
+    const isValid = await argon2.verify(existingUser.password, password);
+
+    if (!isValid) {
+      return res.status(400).json({ success: false, msg: "Invalid password" });
+    }
+
+    if (existingUser.is2fa) {
+    }
+
+    const accessToken = await generateAccessToken(
+      existingUser.id,
+      existingUser.email
+    );
+    const refreshToken = await generateRefreshToken(
+      existingUser.id,
+      existingUser.email
+    );
+
+    await db
+      .update(Users)
+      .set({
+        lastLoginAt: new Date(),
+      })
+      .where(eq(Users.email, email));
+
+    const hashedRefreshToken = await argon2.hash(refreshToken as string);
+    const sessionId = crypto.randomUUID();
+    const device = req.deviceInfo;
+
+    await db.insert(UserSessions).values({
+      id: sessionId,
+      userId: existingUser.id,
+      refreshToken: hashedRefreshToken,
+      isActive: true,
+
+      deviceName: req.deviceInfo?.deviceName ?? null,
+      deviceType: req.deviceInfo?.deviceType ?? null,
+      os: req.deviceInfo?.os ?? null,
+      browser: req.deviceInfo?.browser ?? null,
+      ipAddress: req.deviceInfo?.ipAddress ?? null,
+    });
+
+    return res
+      .cookie("refreshToken", refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie("accessToken", accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000,
+      })
+
+      .cookie("sid", sessionId, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        success: true,
+        msg: "User login successfully",
+        user: {
+          id: existingUser.id,
+          name: existingUser.name,
+          email: existingUser.email,
+          isAccountVerified: existingUser.isAccountVerified,
+        },
+      });
+  } catch (error: any) {
+    console.error("Server error ", error.message);
+    return res.status(500).json({ msg: "Server error", error: error.message });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken, sid } = req.cookies || req.body;
+
+    if (refreshToken && sid) {
+      // console.log("refresh token and sid");
+
+      const [session] = await db
+        .select()
+        .from(UserSessions)
+        .where(eq(UserSessions.id, sid));
+
+      if (session && session.isActive) {
+        // console.log("session and active");
+
+        const isValid = await argon2.verify(session.refreshToken, refreshToken);
+
+        if (isValid) {
+          // console.log("isValid");
+
+          await db
+            .update(UserSessions)
+            .set({
+              isActive: false,
+              revokedAt: new Date(),
+            })
+            .where(eq(UserSessions.id, sid));
+        }
+      }
+    }
+
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+    res.clearCookie("sid", cookieOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error: any) {
+    console.error(error.message);
+    return res
+      .status(500)
+      .json({ success: false, msg: "Internal server error" });
+  }
+};

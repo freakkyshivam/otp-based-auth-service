@@ -1,33 +1,18 @@
 import { Router } from "express";
-import { 
-    login,
-     register,
-     verifyRegisterOtp,
-     sendResetOtp,
-       resetPassword,
-       
-       logout,
-       terminateAllOtherDevice,
-       refreshToken,
-       revokeSession
-     } from "../controllers/auth.controller.js";
 
-     import authMiddleware from "../middleware/auth.middleware.js";
-     import { deviceInfo } from "../middleware/deviceInfo.js";
+import registerRoutes from "./auth/register.route.js";
+import loginRoutes from "./auth/login.route.js";
+import passwordRoutes from "./auth/password.route.js";
+import sessionRoutes from "./auth/session.route.js";
+import tokenRoutes from './auth/token.route.js'
+import type { Router as RouterType } from "express";
 
-import type { Router as RouterType } from 'express';
+const router: RouterType = Router();
 
-const router:RouterType = Router();
-
-router.post('/register', register);
-router.post('/verify-register-otp', deviceInfo,verifyRegisterOtp)
-router.post('/login',deviceInfo, login);
- router.post('/send-reset-otp',sendResetOtp)
-router.post('/reset-password', resetPassword)
-
-router.post('/logout',logout);
-router.post('/terminate-all-other-device',authMiddleware,terminateAllOtherDevice)
-router.post('/refresh-token',authMiddleware, refreshToken)
-router.post('/revoke-session',authMiddleware, revokeSession)
+router.use(registerRoutes);
+router.use(loginRoutes);
+router.use(passwordRoutes);
+router.use(sessionRoutes);
+router.use(tokenRoutes);
 
 export default router;

@@ -186,3 +186,7 @@ export const updateName = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "Server error", error: error.message });
   }
 };
+
+export const updateProfile = async (req:Request, res:Response)=>{
+  
+}

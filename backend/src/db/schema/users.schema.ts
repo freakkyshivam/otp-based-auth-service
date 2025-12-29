@@ -16,6 +16,7 @@ export const Users = pgTable("users", {
   password: text().notNull(),
 
   is2fa: boolean().default(false),
+  isAccountDeleted: boolean().default(false),
   isAccountVerified: boolean().default(false),
 
   lastLoginAt: timestamp({ withTimezone: true }),

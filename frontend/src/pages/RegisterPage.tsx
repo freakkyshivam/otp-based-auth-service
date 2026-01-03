@@ -17,7 +17,13 @@ import {
   CardFooter
 } from '@/components/ui/card';
 
-import { Eye, EyeOff, UserPlus } from 'lucide-react'
+import { 
+Alert,
+AlertDescription,
+
+} from '@/components/ui/alert'
+
+import { Eye, EyeOff, UserPlus,AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { signupApi, verifyRegistrationOtpApi } from '@/api/authApi';
 
@@ -42,6 +48,8 @@ const RegisterPage = () => {
  const [showPassword, setShowPassword] = useState(false);
  const [step, setStep] = useState<'REGISTER' | 'OTP'>('REGISTER')
  const [email, setEmail] = useState<string>("")
+ const [error, setError] = useState<string>('');
+ const [success, setSuccess] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -59,11 +67,11 @@ const otpForm = useForm<verifyOtpFormData>({
     const result = await signupApi(values.name, values.email, values.password);
     
     if (!result.success){
-      toast.error(result.msg)
+      setError(result.msg)
       return;
     }
       setEmail(values.email);
-      toast.success(result.msg)
+      setSuccess(result.msg)
       setStep("OTP")
  ;
   }
@@ -163,6 +171,15 @@ const otpForm = useForm<verifyOtpFormData>({
               )}
             </div>
 
+            {error && (
+              <Alert variant="destructive" className='border-red-500 text-red-600'>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            
+
                 <Button
               type='submit'
               disabled={signupForm.formState.isSubmitting }
@@ -205,6 +222,13 @@ const otpForm = useForm<verifyOtpFormData>({
                 <p className="text-red-500 text-sm">{otpForm.formState.errors.otp.message}</p>
               )}
             </div>
+
+            {success && (
+              <Alert className="border-green-500 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
                <Button
               type='submit'

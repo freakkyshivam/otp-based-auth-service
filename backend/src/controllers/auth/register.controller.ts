@@ -16,7 +16,7 @@ import {
 import { redis } from "../../config/redis.js";
  
 
-import { findUserByEmail } from "../../services/user.service.js";
+import { findUserByEmail } from "@/services/user/user.service.js";
  
 import { storeOtpInRedis, verifyOtpFromRedis } from "../../services/otp/otp.service.js";
 

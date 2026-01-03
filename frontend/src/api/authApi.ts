@@ -20,7 +20,7 @@ const api = axios.create({
 api.interceptors.response.use( res=> res, async error=>{
     if(error.response?.status === 401){
       try {
-        const {data} = await api.post("/api/auth/refresh-token" )
+        const {data} = await api.post("/api/auth/token/refresh" )
         console.log(data);
         
       } catch (error) {
@@ -124,10 +124,67 @@ export const logoutApi = async ()=>{
 
  export const revokeSessionApi = async (sid : string)=>{
   try {
-    const {data} = await api.post('/api/auth/revoke-session',{sid})
+    const {data} = await api.post('/api/auth/sessions/revoke',{sid})
 
     return data;
   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+ export const terminateAllOtherSessionsApi = async()=>{
+  try {
+
+    await api.post('/api/auth/sessions/terminate-others',{},{
+      withCredentials : true
+    })
+    
+   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+ export const twoFASetupApi = async()=>{
+  try {
+
+    await api.post('/api/auth/mfa/setup',{},{
+      withCredentials : true
+    })
+    
+   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+  export const verifyFASetupApi = async(otp:string)=>{
+  try {
+
+    await api.post('/api/auth/mfa/verify',{otp},{
+      withCredentials : true
+    })
+    
+   } catch (error : unknown) {
     if (error instanceof AxiosError) {
       return error.response?.data;
     }

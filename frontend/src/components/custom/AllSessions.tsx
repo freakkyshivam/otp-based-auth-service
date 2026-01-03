@@ -75,7 +75,7 @@ const AllSessions = () => {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-auto">
       <div className="flex items-center justify-between mb-6">
         <p className="text-sm text-muted-foreground">
           You have {sessions.length} others session{sessions.length !== 1 ? 's' : ''} across your devices

@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 
-export const generateAccessToken = async (id:string, email: string)=>{
+export const generateAccessToken = async (id:string, email: string,is2fa:boolean | null)=>{
    try {
      const payload = {
         id,
-        email
+        email,
+        is2fa
     }
     const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,{expiresIn:"15m"})
     return token;
@@ -14,11 +15,12 @@ export const generateAccessToken = async (id:string, email: string)=>{
    }
 }
 
-export const generateRefreshToken = async (id:string, email: string)=>{
+export const generateRefreshToken = async (id:string, email: string,is2fa:boolean | null)=>{
    try {
      const payload = {
         id,
-        email
+        email,
+        is2fa
     }
     const token = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!,{expiresIn:"7d"})
     return token;

@@ -17,7 +17,14 @@ import {
     CardFooter
 } from '@/components/ui/card'
 
-import { Eye, EyeOff,LogIn } from 'lucide-react';
+
+import { 
+Alert,
+AlertDescription,
+
+} from '@/components/ui/alert'
+
+import { Eye, EyeOff,LogIn,AlertCircle, CheckCircle2 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -36,7 +43,8 @@ export default function LoginForm() {
 
     const [showPassword, setShowPassword] = useState(false)
    const {setUser} = useAuth();
-
+ const [error, setError] = useState<string>('');
+ const [success, setSuccess] = useState<string>("");
     const navigate = useNavigate();
     const {
         register,
@@ -49,16 +57,16 @@ export default function LoginForm() {
     const data = await loginApi(d.email, d.password);
 
     if (!data.success) {
-      toast.error(data.msg);
+      setError(data.msg);
       return;
     }
 
     if (!data.user) {
-      toast.error("Login failed: user data missing");
+      setError("Login failed: user data missing");
       return;
     }
 
-    toast.success(`Welcome back ${data.user.name}`);
+    setSuccess(`Welcome back ${data.user.name}`);
 
     setUser(data.user);
     localStorage.setItem("user", JSON.stringify(data.user));
@@ -133,6 +141,20 @@ export default function LoginForm() {
               <p className="text-red-500 text-sm">{errors.password.message}</p>
             )}
           </div>
+
+          {error && (
+              <Alert variant="destructive" className='border-red-500 text-red-600'>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+             {success && (
+              <Alert className="border-green-500 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
           <Button 
             onClick={handleSubmit(onSubmit)} 

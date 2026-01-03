@@ -10,7 +10,7 @@ interface LastLogin {
 
 interface SecurityEvent {
   id: string;
-  type: 'login' | 'otp' | 'password_change' | 'session_revoked';
+  type: 'login' | 'otp' | 'password_change' | 'session_revoked' | 'password_reset' | 'passkey';
   description: string;
   timestamp: string;
   device?: string;
@@ -72,56 +72,21 @@ const SECURITY_DATA: OverviewData = {
       timestamp: '3 days ago',
       device: 'Chrome (Windows)',
     },
-    {
+     {
       id: '5',
-      type: 'login',
-      description: 'Login successful',
-      timestamp: '5 days ago',
-      device: 'Safari (macOS)',
+      type: 'password_reset',
+      description: 'Password Reset',
+      timestamp: '3 days ago',
+      device: 'Chrome (Windows)',
+    },
+     {
+      id: '6',
+      type: 'passkey',
+      description: 'Passkey added',
+      timestamp: '3 days ago',
+      device: 'Chrome (Windows)',
     },
   ],
-};
-
-// Subcomponents
-const StatusBadge = ({ status }: { status: 'secure' | 'warning' | 'risk' }) => {
-  const config = {
-    secure: { text: 'Secure', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/50' },
-    warning: { text: 'Warning', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/50' },
-    risk: { text: 'At Risk', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/50' },
-  };
-
-  const { text, color, bg, border } = config[status];
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${color} ${bg} border ${border}`}>
-      {status === 'secure' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-      {text}
-    </span>
-  );
-};
-
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <div className={`bg-card/50  backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-xl ${className}`}>
-    {children}
-  </div>
-);
-
-const CardTitle = ({ children, icon: Icon }: { children: React.ReactNode; icon?: React.ElementType }) => (
-  <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-3">
-    {Icon && <Icon className="w-4 h-4 text-gray-300" />}
-    {children}
-  </h2>
-);
-
-const SecurityEventIcon = ({ type }: { type: SecurityEvent['type'] }) => {
-  const icons = {
-    login: <LogIn className="w-4 h-4 text-green-400" />,
-    otp: <Key className="w-4 h-4 text-blue-400" />,
-    password_change: <Lock className="w-4 h-4 text-purple-400" />,
-    session_revoked: <UserX className="w-4 h-4 text-red-400" />,
-  };
-
-  return <div className="shrink-0">{icons[type]}</div>;
 };
 
 // Main Component
@@ -137,6 +102,26 @@ export default function SecurityOverview() {
 
   const securityStatus = getSecurityStatus();
 
+  // Status badge config
+  const statusConfig = {
+    secure: { text: 'Secure', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/50' },
+    warning: { text: 'Warning', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/50' },
+    risk: { text: 'At Risk', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/50' },
+  };
+
+  const currentStatus = statusConfig[securityStatus];
+
+  // Security event icons
+  const getEventIcon = (type: SecurityEvent['type']) => {
+    const icons = {
+      login: <LogIn className="w-4 h-4 text-green-400" />,
+      otp: <Key className="w-4 h-4 text-blue-400" />,
+      password_change: <Lock className="w-4 h-4 text-purple-400" />,
+      session_revoked: <UserX className="w-4 h-4 text-red-400" />,
+    };
+    return icons[type];
+  };
+
   // Check for warnings
   const warnings = [
     !data.emailVerified && { type: 'email', message: 'Email not verified', action: 'Verify your email address' },
@@ -145,13 +130,13 @@ export default function SecurityOverview() {
   ].filter(Boolean);
 
   return (
-    <div className=" overflow-hidden bg-transparent p-4">
+    <div className="bg-transparent p-4 ml-16 ">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Header */}
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <h1 className="text-2xl font-bold text-white mb-1">Security Overview</h1>
           <p className="text-sm text-gray-400">Monitor your account security and recent activity</p>
-        </div> */}
+        </div>
 
         {/* Security Warnings - Conditional */}
         {warnings.length > 0 && (
@@ -180,10 +165,16 @@ export default function SecurityOverview() {
         )}
 
         {/* Account Security Status Card */}
-        <Card>
+        <div className="bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-xl">
           <div className="flex items-center justify-between mb-3">
-            <CardTitle icon={Shield}>Account Security Status</CardTitle>
-            <StatusBadge status={securityStatus} />
+            <h2 className="text-base font-semibold text-white flex items-center gap-2">
+              <Shield className="w-4 h-4 text-gray-300" />
+              Account Security Status
+            </h2>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${currentStatus.color} ${currentStatus.bg} border ${currentStatus.border}`}>
+              {securityStatus === 'secure' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+              {currentStatus.text}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -240,15 +231,18 @@ export default function SecurityOverview() {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - 2FA and Active Sessions */}
           <div className="lg:col-span-1 space-y-4">
             {/* Two-Factor Authentication Card */}
-            <Card>
-              <CardTitle icon={Lock}>Two-Factor Authentication</CardTitle>
+            <div className="bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-xl">
+              <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-3">
+                <Lock className="w-4 h-4 text-gray-300" />
+                Two-Factor Authentication
+              </h2>
 
               {data.twoFactorEnabled ? (
                 <div className="space-y-2">
@@ -263,7 +257,7 @@ export default function SecurityOverview() {
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-start gap-2 text-red-300 bg-red-950/50 p-3 rounded-lg border border-red-500/30">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-medium">2FA is disabled</p>
                       <p className="text-xs text-red-400 mt-1">
@@ -276,11 +270,14 @@ export default function SecurityOverview() {
                   </button>
                 </div>
               )}
-            </Card>
+            </div>
 
             {/* Active Sessions Summary */}
-            <Card>
-              <CardTitle icon={Smartphone}>Active Sessions</CardTitle>
+            <div className="bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-xl">
+              <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-3">
+                <Smartphone className="w-4 h-4 text-gray-300" />
+                Active Sessions
+              </h2>
 
               <div className="space-y-3">
                 <div className="text-center py-3">
@@ -303,17 +300,20 @@ export default function SecurityOverview() {
                   View All Sessions
                 </button>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Right Column - Recent Activity */}
-          <Card className="lg:col-span-2">
-            <CardTitle icon={Clock}>Recent Activity</CardTitle>
+          <div className="lg:col-span-2 bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 shadow-xl h-fit">
+            <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-gray-300" />
+              Recent Activity
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {data.recentActivity.map((event) => (
                 <div key={event.id} className="flex items-start gap-2 p-3 bg-gray-800/60 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
-                  <SecurityEventIcon type={event.type} />
+                  <div className="shrink-0">{getEventIcon(event.type)}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-white">{event.description}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{event.timestamp}</p>
@@ -322,7 +322,7 @@ export default function SecurityOverview() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

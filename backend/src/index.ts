@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.route.js'
 import cors from 'cors'
 import http from 'node:http'
+import { initSodium } from "@/config/sodium.js"; 
 
 const allowedOrigin = [
     'http://localhost:5173',
@@ -39,5 +40,7 @@ app.use('/api/user', userRoutes)
 app.get("/health", (req, res) => {
   res.send("OK");
 });
+
+await initSodium();
 
 server.listen(PORT, () => console.log(`🚀 Server listen at http://localhost:${PORT}`));

@@ -8,7 +8,7 @@ import { UserSessions } from "../../db/schema/user_sessions.schema.js";
 
 import { loginValidation } from "../../validation/validation.js";
 
-import { findUserByEmail } from "../../services/user.service.js";
+import { findUserByEmail } from "@/services/user/user.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -16,6 +16,9 @@ import {
 
 import crypto from "node:crypto";
 import { cookieOptions } from "../../utils/cookiesAption.js";
+import jwt from "jsonwebtoken";
+import  authenticator  from "@/config/otplib.js";
+import { encryptSecret, decryptSecret } from "@/utils/crypto.util.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -54,15 +57,33 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (existingUser.is2fa) {
+      const tempToken = jwt.sign(
+        {
+          id: existingUser?.id,
+          email: existingUser.email,
+          is2fa: existingUser.is2fa,
+          purpose: "2fa",
+        },
+        process.env.JWT_TEMP_TOKEN_SECRET!,
+        {
+          expiresIn: "5m",
+        }
+      );
+      return res.status(200).cookie("tempToken", tempToken, {
+        ...cookieOptions,
+        maxAge: 5 * 60 * 60,
+      });
     }
 
     const accessToken = await generateAccessToken(
       existingUser.id,
-      existingUser.email
+      existingUser.email,
+      existingUser.is2fa
     );
     const refreshToken = await generateRefreshToken(
       existingUser.id,
-      existingUser.email
+      existingUser.email,
+      existingUser.is2fa
     );
 
     await db
@@ -116,7 +137,118 @@ export const login = async (req: Request, res: Response) => {
       });
   } catch (error: any) {
     console.error("Server error ", error.message);
-    return res.status(500).json({ msg: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ success: false, msg: "Something went wrong" });
+  }
+};
+
+export const verify2faLogin = async (req: Request, res: Response) => {
+  try {
+    const { otp,type  } = req.body;
+
+    const user = req.user;
+
+    if (!user?.id) {
+      return res.status(401).json({ success: false, msg: "Unauthorized" });
+    }
+
+    const existingUser = await findUserByEmail(user.email);
+
+    if (!existingUser?.twoFactorSecret || !existingUser?.twoFactorNonce) {
+      return res.status(400).json({
+        success: false,
+        msg: "2FA is misconfigured on this account",
+      });
+    }
+
+    const secret = decryptSecret(
+      existingUser?.twoFactorSecret,
+      existingUser?.twoFactorNonce
+    );
+    if (!secret) {
+      return res.status(400).json({
+        success: false,
+        msg: "Two factor authentication secret not found",
+      });
+    }
+    const isValid = authenticator.verify({
+      token: otp,
+      secret,
+      
+    });
+
+    if (!isValid) {
+      throw new Error("Invalid two factor authentication OTP");
+    }
+
+    const accessToken = await generateAccessToken(
+      existingUser.id,
+      existingUser.email,
+      existingUser.is2fa
+    );
+    const refreshToken = await generateRefreshToken(
+      existingUser.id,
+      existingUser.email,
+      existingUser.is2fa
+    );
+
+    await db
+      .update(Users)
+      .set({
+        lastLoginAt: new Date(),
+      })
+      .where(eq(Users.email, user.email));
+
+    const hashedRefreshToken = await argon2.hash(refreshToken as string);
+    const sessionId = crypto.randomUUID();
+    const device = req.deviceInfo;
+
+    await db.insert(UserSessions).values({
+      id: sessionId,
+      userId: existingUser.id,
+      refreshToken: hashedRefreshToken,
+      isActive: true,
+
+      deviceName: req.deviceInfo?.deviceName ?? null,
+      deviceType: req.deviceInfo?.deviceType ?? null,
+      os: req.deviceInfo?.os ?? null,
+      browser: req.deviceInfo?.browser ?? null,
+      ipAddress: req.deviceInfo?.ipAddress ?? null,
+    });
+
+    res.clearCookie("tempToken", cookieOptions);
+
+    return res
+      .cookie("refreshToken", refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie("accessToken", accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000,
+      })
+
+      .cookie("sid", sessionId, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        success: true,
+        msg: "User login successfully",
+        user: {
+          id: existingUser.id,
+          name: existingUser.name,
+          email: existingUser.email,
+          isAccountVerified: existingUser.isAccountVerified,
+        },
+      });
+  } catch (error: any) {
+    console.error("Server error (2FA login error ) ", error.message);
+    return res
+      .status(500)
+      .json({ success: false, msg: "Something went wrong" });
   }
 };
 
@@ -163,6 +295,6 @@ export const logout = async (req: Request, res: Response) => {
     console.error(error.message);
     return res
       .status(500)
-      .json({ success: false, msg: "Internal server error" });
+      .json({ success: false, msg: "Something went wrong" });
   }
 };

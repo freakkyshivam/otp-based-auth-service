@@ -8,29 +8,34 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const Users = pgTable("users", {
-  id: uuid().primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().defaultRandom(),
 
-  name: varchar({ length: 250 }).notNull(),
-  email: varchar({ length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 250 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
 
-  password: text().notNull(),
+  password: text("password").notNull(),
 
-  is2fa: boolean().default(false),
-  isAccountDeleted: boolean().default(false),
-  isAccountVerified: boolean().default(false),
+is2fa: boolean("is_2fa").notNull().default(false),
 
-  lastLoginAt: timestamp({ withTimezone: true }),
+twoFactorSecret: text("two_factor_secret"),
+twoFactorNonce: text("two_factor_nonce"),
 
-  createdAt: timestamp({ withTimezone: true })
+isAccountDeleted: boolean("is_account_deleted").notNull().default(false),
+isAccountVerified: boolean("is_account_verified").notNull().default(false),
+
+
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 
-  updatedAt: timestamp({ withTimezone: true })
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
 
-  deletedAt: timestamp({ withTimezone: true }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export default Users;

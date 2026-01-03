@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AllSessions from '@/components/custom/AllSessions';
 import Profile from '@/components/custom/Profile';
 import SecurityOverview from '@/components/custom/Overview';
+import TwoFactorSetup from '@/components/custom/TwoFactorLogin';
  
  
 
@@ -56,6 +57,10 @@ const UserDashboard = () => {
              )}
              {activeItem === 'Overview' && (
               <SecurityOverview/>
+             )}
+
+             {activeItem === "Two-Factor Authentication" && (
+              <TwoFactorSetup/>
              )}
           </div>
         </main>

@@ -28,6 +28,15 @@ interface OverviewData {
   recentActivity: SecurityEvent[];
 }
 
+type WarningType = "email" | "2fa" | "sessions";
+
+interface SecurityWarning {
+  type: WarningType;
+  message: string;
+  action: string;
+}
+
+
 // Placeholder data
 const SECURITY_DATA: OverviewData = {
   emailVerified: true,
@@ -118,16 +127,39 @@ export default function SecurityOverview() {
       otp: <Key className="w-4 h-4 text-blue-400" />,
       password_change: <Lock className="w-4 h-4 text-purple-400" />,
       session_revoked: <UserX className="w-4 h-4 text-red-400" />,
+      password_reset: <Lock className="w-4 h-4 text-purple-400" />,
+      passkey: <UserX className="w-4 h-4 text-red-400" />,
     };
     return icons[type];
   };
 
   // Check for warnings
-  const warnings = [
-    !data.emailVerified && { type: 'email', message: 'Email not verified', action: 'Verify your email address' },
-    !data.twoFactorEnabled && { type: '2fa', message: 'Two-factor authentication disabled', action: 'Enable 2FA for better security' },
-    data.activeSessionsCount > 3 && { type: 'sessions', message: `${data.activeSessionsCount} active sessions detected`, action: 'Review your active sessions' },
-  ].filter(Boolean);
+const warnings: SecurityWarning[] = [];
+
+if (!data.emailVerified) {
+  warnings.push({
+    type: "email",
+    message: "Email not verified",
+    action: "Verify your email address",
+  });
+}
+
+if (!data.twoFactorEnabled) {
+  warnings.push({
+    type: "2fa",
+    message: "Two-factor authentication disabled",
+    action: "Enable 2FA for better security",
+  });
+}
+
+if (data.activeSessionsCount > 3) {
+  warnings.push({
+    type: "sessions",
+    message: `${data.activeSessionsCount} active sessions detected`,
+    action: "Review your active sessions",
+  });
+}
+
 
   return (
     <div className="bg-transparent p-4 ml-16 ">
@@ -149,7 +181,7 @@ export default function SecurityOverview() {
               </div>
             </div>
             <div className="ml-7 space-y-2">
-              {warnings.map((warning: any, index) => (
+              {warnings.map((warning, index) => (
                 <div key={index} className="flex items-start justify-between gap-2 bg-card/50 backdrop-blur-sm p-2 rounded-lg border border-red-500/20">
                   <div className="flex-1">
                     <p className="text-xs font-medium text-red-300">{warning.message}</p>

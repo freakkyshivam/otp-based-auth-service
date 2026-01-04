@@ -1,4 +1,4 @@
-import { verifyTotp } from "@/services/otp/totp.service.js";
+ 
 import { NextFunction,Request, Response } from "express";
 
 export const require2fEnabled = async (req:Request, res:Response, next:NextFunction)=>{

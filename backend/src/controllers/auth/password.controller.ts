@@ -10,7 +10,7 @@ import {
   resetPasswordValidation,
 } from "../../validation/validation.js";
 
-import { findUserByEmail } from "../../services/user.service.js";
+import { findUserByEmail } from "@/services/user/user.service.js";
 
 import {
   storeOtpInRedis,

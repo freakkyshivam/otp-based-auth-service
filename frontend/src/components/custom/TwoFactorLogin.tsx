@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Smartphone, Copy, CheckCircle, XCircle, AlertTriangle, Key, Download, Check } from 'lucide-react';
+import { twoFASetupApi,verifyFASetupApi } from '@/api/authApi';
 
 export default function TwoFactorSetup() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -8,11 +9,10 @@ export default function TwoFactorSetup() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [setupComplete, setSetupComplete] = useState(false);
   const [error, setError] = useState('');
-
-  // Mock data
-  const secretKey = 'JBSWY3DPEHPK3PXP';
-  const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=otpauth://totp/YourApp:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=YourApp';
-  const backupCodes = ['8A3B-C7D2-E9F1', '4K5L-M6N7-P8Q9', '2R3S-T4U5-V6W7', 'X8Y9-Z1A2-B3C4', 'D5E6-F7G8-H9I0'];
+  const [qrCodeUrl, setQrcodeUrl] = useState<string>('');
+  const [backupCodes, setBackupCodes] = useState([]);
+  const [secretKey, setSecretKey] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleCopySecret = () => {
     navigator.clipboard.writeText(secretKey);
@@ -20,18 +20,51 @@ export default function TwoFactorSetup() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleVerifyCode = () => {
-    setIsVerifying(true);
-    setError('');
-    setTimeout(() => {
-      if (verificationCode.length === 6) {
+  const handleGenerateQrCode = async ()=>{
+    setLoading(true)
+    try {
+      const res = await twoFASetupApi()
+    if(!res.success){
+      setError("Qr code generation failed")
+    }
+    setCurrentStep(2);
+    setQrcodeUrl(res.qr)
+    setSecretKey(res.secret)
+    } catch (error) {
+      console.error(error)
+    }finally{
+      setLoading(false)
+    }
+    
+  }
+
+  const handleVerifyCode = async () => {
+    setLoading(true)
+    try {
+      setIsVerifying(true);
+      setError('');
+      const res = await verifyFASetupApi(verificationCode)
+     if(!res.success){
+       setError(res.msg);
+       return;
+     }
+       console.log(res);
+
+       if(!res.backupCodes){
+        setError("Backupcodes not generated")
+       }
+       
+        setBackupCodes(res.backupCodes)
         setCurrentStep(3);
         setSetupComplete(true);
-      } else {
-        setError('Invalid code. Please enter a 6-digit code.');
-      }
+      
+    
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setLoading(false)
       setIsVerifying(false);
-    }, 1000);
+    }
   };
 
   const handleDownloadBackupCodes = () => {
@@ -88,10 +121,10 @@ export default function TwoFactorSetup() {
 
         {/* Main Content - Fits in remaining space */}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 overflow-auto">
+          <div className="h-fit bg-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 overflow-auto">
             {/* Step 1 */}
             {currentStep === 1 && (
-              <div className="h-full flex flex-col">
+              <div className="h-fit flex flex-col">
                 <div className="flex items-center gap-2 mb-3">
                   <Smartphone className="w-5 h-5 text-blue-400" />
                   <h2 className="text-lg font-bold text-white">Step 1: Install Authenticator App</h2>
@@ -100,7 +133,7 @@ export default function TwoFactorSetup() {
                 <div className="flex-1 overflow-auto">
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="p-3 bg-gray-800/60 rounded-lg border border-gray-700 hover:border-blue-500/50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
+                      <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
                         <Key className="w-5 h-5 text-white" />
                       </div>
                       <p className="text-white text-sm font-medium text-center">Google Authenticator</p>
@@ -108,7 +141,7 @@ export default function TwoFactorSetup() {
                     </div>
 
                     <div className="p-3 bg-gray-800/60 rounded-lg border border-gray-700 hover:border-purple-500/50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
+                      <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
                         <Shield className="w-5 h-5 text-white" />
                       </div>
                       <p className="text-white text-sm font-medium text-center">Microsoft Authenticator</p>
@@ -116,7 +149,7 @@ export default function TwoFactorSetup() {
                     </div>
 
                     <div className="p-3 bg-gray-800/60 rounded-lg border border-gray-700 hover:border-green-500/50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
+                      <div className="w-10 h-10 bg-linear-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-2 mx-auto">
                         <Key className="w-5 h-5 text-white" />
                       </div>
                       <p className="text-white text-sm font-medium text-center">Authy</p>
@@ -126,7 +159,8 @@ export default function TwoFactorSetup() {
                 </div>
 
                 <button
-                  onClick={() => setCurrentStep(2)}
+                disabled={loading}
+                  onClick={handleGenerateQrCode}
                   className="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/30 w-full"
                 >
                   Next: Scan QR Code
@@ -143,7 +177,7 @@ export default function TwoFactorSetup() {
                 </div>
 
                 <div className="flex-1 grid grid-cols-2 gap-4">
-                  {/* Left: QR Code */}
+                  
                   <div className="flex flex-col items-center justify-center bg-gray-800/60 rounded-lg border border-gray-700 p-4">
                     <div className="p-3 bg-white rounded-lg mb-3">
                       <img src={qrCodeUrl} alt="QR Code" className="w-40 h-40" />
@@ -223,7 +257,7 @@ export default function TwoFactorSetup() {
 
                   <div className="bg-yellow-950/20 border border-yellow-500/30 rounded-lg p-3">
                     <div className="flex items-start gap-2 mb-3">
-                      <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-yellow-400 text-sm font-semibold">Save Your Backup Codes</p>
                         <p className="text-yellow-300 text-xs">Use these to access your account if you lose your device.</p>
@@ -232,7 +266,7 @@ export default function TwoFactorSetup() {
 
                     <div className="bg-gray-900 rounded-lg p-3 border border-gray-700">
                       <div className="grid grid-cols-2 gap-2">
-                        {backupCodes.map((code, index) => (
+                        {backupCodes?.map((code, index) => (
                           <div key={index} className="flex items-center justify-center p-2 bg-gray-800 rounded-lg border border-gray-700">
                             <code className="text-white font-mono text-xs">{code}</code>
                           </div>

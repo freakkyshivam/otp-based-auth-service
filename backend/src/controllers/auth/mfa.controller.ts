@@ -8,6 +8,7 @@ import authenticator from "@/config/otplib.js";
 import { encryptSecret, decryptSecret } from "@/utils/crypto.util.js";
 import { generateAndSaveBackupCode } from "@/services/user/generateAndSaveBackupcode.js";
 
+
 export const setup2fa = async (req: Request, res: Response) => {
   try {
     const user = req.user;
@@ -39,7 +40,7 @@ export const setup2fa = async (req: Request, res: Response) => {
 
     return res
       .status(200)
-      .json({ success: true, msg: "Qrcode is generated for 2FA setup", qr });
+      .json({ success: true, msg: "Qrcode is generated for 2FA setup", qr,secret });
   } catch (error: any) {
     console.log("Internal server error ", error.message);
 
@@ -112,7 +113,10 @@ export const verify2faSetup = async (req: Request, res: Response) => {
 
     await redis.del(`2fa:setup:${user.id}`);
 
-    const plainBackupCodes = generateAndSaveBackupCode(user.id)
+    const plainBackupCodes = await generateAndSaveBackupCode(user.id)
+
+    console.log(plainBackupCodes);
+    
 
     return res.status(200).json({
   success: true,

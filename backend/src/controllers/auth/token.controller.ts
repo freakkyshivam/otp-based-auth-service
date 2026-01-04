@@ -73,8 +73,8 @@ export const refreshToken = async (req: Request, res: Response) => {
       }
 
       
-        const newAccessToken = await generateAccessToken(user.id, user.email);
-        const newRefreshToken = await generateRefreshToken(user.id, user.email);
+        const newAccessToken = await generateAccessToken(user.id, user.email,user.is2fa);
+        const newRefreshToken = await generateRefreshToken(user.id, user.email, user.is2fa);
 
         const newHashedRefreshToken = await argon2.hash(newRefreshToken as string);
 

@@ -40,6 +40,7 @@ export const loginApi = async (email:string, password:string):Promise<LoginRespo
           email ,
           password
         } )
+        console.log(data);
         
         return data;
       } catch (error : unknown) {
@@ -161,10 +162,10 @@ export const logoutApi = async ()=>{
  export const twoFASetupApi = async()=>{
   try {
 
-    await api.post('/api/auth/mfa/setup',{},{
+   const {data} = await api.post('/api/auth/mfa/setup',{},{
       withCredentials : true
     })
-    
+    return data;
    } catch (error : unknown) {
     if (error instanceof AxiosError) {
       return error.response?.data;
@@ -180,9 +181,32 @@ export const logoutApi = async ()=>{
   export const verifyFASetupApi = async(otp:string)=>{
   try {
 
-    await api.post('/api/auth/mfa/verify',{otp},{
+    const {data} = await api.post('/api/auth/mfa/verify',{otp},{
       withCredentials : true
     })
+
+    return data;
+    
+   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+  export const verify2FALoginApi = async(code:string, type:string):Promise<LoginResponse>=>{
+  try {
+
+    const {data} = await api.post('/api/auth/login/verify2fa',{code,type},{
+      withCredentials : true
+    })
+
+    return data;
     
    } catch (error : unknown) {
     if (error instanceof AxiosError) {

@@ -21,4 +21,6 @@ export const generateAndSaveBackupCode = async (id:string)=>{
         hashCode : hash
       })
     }
+
+    return plainBackupCodes
 }

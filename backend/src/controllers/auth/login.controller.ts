@@ -17,8 +17,9 @@ import {
 import crypto from "node:crypto";
 import { cookieOptions } from "../../utils/cookiesAption.js";
 import jwt from "jsonwebtoken";
-import  authenticator  from "@/config/otplib.js";
+import authenticator from "@/config/otplib.js";
 import { encryptSecret, decryptSecret } from "@/utils/crypto.util.js";
+import backupCodesTable from "@/db/schema/user_2fa_backupcode.scema.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -69,10 +70,17 @@ export const login = async (req: Request, res: Response) => {
           expiresIn: "5m",
         }
       );
-      return res.status(200).cookie("tempToken", tempToken, {
-        ...cookieOptions,
-        maxAge: 5 * 60 * 60,
-      });
+      return res
+        .status(200)
+        .cookie("tempToken", tempToken, {
+          ...cookieOptions,
+          maxAge: 5 * 60 * 60,
+        })
+        .json({
+          success: true,
+          msg: "Enter OTP from authenticator app",
+          twoFactorEnabled: true,
+        });
     }
 
     const accessToken = await generateAccessToken(
@@ -145,7 +153,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const verify2faLogin = async (req: Request, res: Response) => {
   try {
-    const { otp,type  } = req.body;
+    const { code, type } = req.body;
 
     const user = req.user;
 
@@ -172,15 +180,58 @@ export const verify2faLogin = async (req: Request, res: Response) => {
         msg: "Two factor authentication secret not found",
       });
     }
-    const isValid = authenticator.verify({
-      token: otp,
-      secret,
-      
-    });
 
-    if (!isValid) {
-      throw new Error("Invalid two factor authentication OTP");
+   
+    if (type === "OTP") {
+      const isValid = authenticator.verify({
+        token: code,
+        secret,
+      });
+      if(!isValid){
+      return res.status(400).json({
+        success: false,
+        msg: "Wrong OTP",
+      });
     }
+    } else {
+      let isValid = false;
+      const backupCodes = await db
+    .select({ hashCode: backupCodesTable.hashCode })
+    .from(backupCodesTable)
+    .where(
+      and(
+        eq(backupCodesTable.userId, user.id),
+        eq(backupCodesTable.used, false)
+      )
+    );
+
+      for (const bc of backupCodes) {
+        if (await argon2.verify(bc.hashCode, code)) {
+       
+    const result = await db
+        .update(backupCodesTable)
+        .set({ used: true, usedAt: new Date() })
+        .where(
+          and(
+            eq(backupCodesTable.hashCode, bc.hashCode),
+            eq(backupCodesTable.used, false)
+          )
+        );
+
+         isValid = true;
+
+      break;
+    }
+      }
+      if (!isValid) {
+       return res.status(400).json({
+        success: false,
+        msg: "Wrong backup code or already used",
+      });
+    }
+    }
+
+    
 
     const accessToken = await generateAccessToken(
       existingUser.id,

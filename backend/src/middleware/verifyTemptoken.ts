@@ -8,9 +8,11 @@ export const verifyTemptoken = async (req:Request, res:Response, next:NextFuncti
     try {
 
         const {tempToken} = req.cookies || req.headers['authorization']?.split(" ")[1];
+ 
+        
 
         if(!tempToken){
-            return res.status(401).json({success:false, msg:"Temp token is missing"})
+            return res.status(400).json({success:false, msg:"Temp token is missing"})
         }
 
         const decoded = jwt.verify(tempToken,process.env.JWT_TEMP_TOKEN_SECRET!) as JwtPayload
@@ -24,6 +26,6 @@ export const verifyTemptoken = async (req:Request, res:Response, next:NextFuncti
         
     } catch (error) {
         console.error("Temptoken verification error",error)
-       return res.status(401).json({ msg: "Temp token expired or invalid" });
+       return res.status(402).json({ msg: "Temp token expired or invalid" });
     }
 }

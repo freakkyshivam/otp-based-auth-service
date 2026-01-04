@@ -1,37 +1,46 @@
-import sodium, {getSodiumKey} from '@/config/sodium.js'
 
-export const encryptSecret = (secret : string)=>{
-    const key = getSodiumKey();
+import crypto from "node:crypto";
 
-    const nonce = sodium.randombytes_buf(
-        sodium.crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-    )
+const ALGO = "aes-256-gcm";
+const KEY = Buffer.from(process.env.APP_SECRET_KEY!, "hex"); // 32 bytes
 
-    const cipher = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
-        secret,
-        null,
-        null,
-        nonce,
-        key
-    )
+export function encryptSecret(secret: string) {
+  const nonce = crypto.randomBytes(12); // 12 bytes IV (recommended for GCM)
 
-     return {
-    cipher: Buffer.from(cipher).toString("base64"),
-    nonce: Buffer.from(nonce).toString("base64"),
+  const cipher = crypto.createCipheriv(ALGO, KEY, nonce);
+
+  const encrypted = Buffer.concat([
+    cipher.update(secret, "utf8"),
+    cipher.final(),
+  ]);
+
+  const authTag = cipher.getAuthTag();
+
+  // 🔥 cipher = encrypted + authTag
+  const finalCipher = Buffer.concat([encrypted, authTag]);
+
+  return {
+    cipher: finalCipher.toString("hex"),
+    nonce: nonce.toString("hex"),
   };
 }
 
-export const decryptSecret = (cipherB64: string, nonceB64: string) => {
-  const key = getSodiumKey();
 
-  const plain = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
-    null,
-    Buffer.from(cipherB64, "base64"),
-    null,
-    Buffer.from(nonceB64, "base64"),
-    key
-  );
+export function decryptSecret(cipherHex: string, nonceHex: string) {
+  const data = Buffer.from(cipherHex, "hex");
+  const nonce = Buffer.from(nonceHex, "hex");
 
-  return Buffer.from(plain).toString();
-};
- 
+  // Last 16 bytes = authTag
+  const authTag = data.subarray(data.length - 16);
+  const encrypted = data.subarray(0, data.length - 16);
+
+  const decipher = crypto.createDecipheriv(ALGO, KEY, nonce);
+  decipher.setAuthTag(authTag);
+
+  const decrypted = Buffer.concat([
+    decipher.update(encrypted),
+    decipher.final(),
+  ]);
+
+  return decrypted.toString("utf8");
+}

@@ -26,6 +26,7 @@ export interface LoginSuccessResponse {
   success: true;
   msg: string;
   user: User;
+  twoFactorEnabled? : boolean
 }
 
 export interface LoginErrorResponse {

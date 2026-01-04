@@ -25,6 +25,7 @@ Implements OTP-based login, session management, refresh token rotation, and devi
 - Rate limiting for OTP abuse prevention
 - Email delivery via queue-based system
 - Clean backend–frontend separation (monorepo)
+- Two step verification via OTP or backupcodes
 
 ---
 

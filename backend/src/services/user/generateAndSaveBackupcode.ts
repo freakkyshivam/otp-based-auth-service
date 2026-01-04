@@ -1,8 +1,8 @@
-import generateBackupCode from "@/utils/generateBackupCodes.js";
+import generateBackupCode from "../../utils/generateBackupCodes.js";
 import argon2 from "argon2";
-import backupCodesTable from "@/db/schema/user_2fa_backupcode.scema.js";
+import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 import db
- from "@/db/db.js";
+ from "../../db/db.js";
 export const generateAndSaveBackupCode = async (id:string)=>{
     const plainBackupCodes: string[] = [];
 

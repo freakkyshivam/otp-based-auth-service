@@ -2,9 +2,9 @@ import { Router } from "express";
 import {
   register,
   verifyRegisterOtp,
-} from "@/controllers/auth/register.controller.js";
+} from "../../controllers/auth/register.controller.js";
 
-import { deviceInfo } from "@/middleware/deviceInfo.js";
+import { deviceInfo } from "../../middleware/deviceInfo.js";
 
 import type { Router as RouterType } from "express";
 

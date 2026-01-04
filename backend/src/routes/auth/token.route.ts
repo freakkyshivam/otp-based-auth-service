@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
   refreshToken
-} from "@/controllers/auth/token.controller.js";
- import authMiddleware from "@/middleware/auth.middleware.js";
+} from "../../controllers/auth/token.controller.js";
+ import authMiddleware from "../../middleware/auth.middleware.js";
 
 import type { Router as RouterType } from "express";
 const router:RouterType = Router();

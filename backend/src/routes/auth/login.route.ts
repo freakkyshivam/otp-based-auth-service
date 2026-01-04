@@ -3,11 +3,11 @@ import {
   login,
   logout,
   verify2faLogin
-} from "@/controllers/auth/login.controller.js";
+} from "../../controllers/auth/login.controller.js";
  
 
 import type { Router as RouterType } from "express";
-import { verifyTemptoken } from "@/middleware/verifyTemptoken.js";
+import { verifyTemptoken } from "../../middleware/verifyTemptoken.js";
 
 const router: RouterType = Router();
 

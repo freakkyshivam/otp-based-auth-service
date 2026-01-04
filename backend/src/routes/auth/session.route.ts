@@ -2,8 +2,8 @@ import { Router } from "express";
 import {
   terminateAllOtherDevice,
   revokeSession,
-} from "@/controllers/auth/session.controller.js";
-import authMiddleware from "@/middleware/auth.middleware.js";
+} from "../../controllers/auth/session.controller.js";
+import authMiddleware from "../../middleware/auth.middleware.js";
 
 import type { Router as RouterType } from "express";
 

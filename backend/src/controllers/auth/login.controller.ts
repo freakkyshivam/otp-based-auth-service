@@ -8,7 +8,7 @@ import { UserSessions } from "../../db/schema/user_sessions.schema.js";
 
 import { loginValidation } from "../../validation/validation.js";
 
-import { findUserByEmail } from "@/services/user/user.service.js";
+import { findUserByEmail } from "../../services/user/user.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -17,9 +17,9 @@ import {
 import crypto from "node:crypto";
 import { cookieOptions } from "../../utils/cookiesAption.js";
 import jwt from "jsonwebtoken";
-import authenticator from "@/config/otplib.js";
-import { encryptSecret, decryptSecret } from "@/utils/crypto.util.js";
-import backupCodesTable from "@/db/schema/user_2fa_backupcode.scema.js";
+import authenticator from "../../config/otplib.js";
+import { encryptSecret, decryptSecret } from "../../utils/crypto.util.js";
+import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 
 export const login = async (req: Request, res: Response) => {
   try {

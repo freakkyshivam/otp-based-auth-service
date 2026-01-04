@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   sendResetOtp,
   resetPassword,
-} from "@/controllers/auth/password.controller.js";
+} from "../../controllers/auth/password.controller.js";
  
 
 import type { Router as RouterType } from "express";

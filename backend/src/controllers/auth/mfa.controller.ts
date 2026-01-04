@@ -1,12 +1,12 @@
 import { type Request, type Response } from "express";
-import { generateQr } from "@/utils/qr.js";
-import { redis } from "@/config/redis.js";
-import db from "@/db/db.js";
-import Users from "@/db/schema/users.schema.js";
+import { generateQr } from "../../utils/qr.js";
+import { redis } from "../../config/redis.js";
+import db from "../../db/db.js";
+import Users from "../../db/schema/users.schema.js";
 import { eq } from "drizzle-orm";
-import authenticator from "@/config/otplib.js";
-import { encryptSecret, decryptSecret } from "@/utils/crypto.util.js";
-import { generateAndSaveBackupCode } from "@/services/user/generateAndSaveBackupcode.js";
+import authenticator from "../../config/otplib.js";
+import { encryptSecret, decryptSecret } from "../../utils/crypto.util.js";
+import { generateAndSaveBackupCode } from "../../services/user/generateAndSaveBackupcode.js";
 
 
 export const setup2fa = async (req: Request, res: Response) => {

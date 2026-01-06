@@ -22,14 +22,14 @@ export interface LoginResponse {
   success: boolean;
   msg: string;
   user: User;
-  accessToken?: string;  
-  device?: DeviceInfo;   
+  accessToken: string;     
 }
 
 export interface LoginSuccessResponse {
   success: true;
   msg: string;
   user: User;
+   accessToken: string; 
   twoFactorEnabled? : boolean,
 }
 

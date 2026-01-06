@@ -6,25 +6,35 @@
   NormalApiResponse
  } from '@/types/types';
 import axios,{AxiosError} from 'axios'
-import {logout} from '@/utils/logout'
- import { useAuth } from "@/auth/useAuth";
+import {logoutPure} from '@/utils/logout'
+ 
  
 
 type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
-
+ 
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, 
-  withCredentials:true
 });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+
+  return config;
+});
+
 
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const { resetAuth } = useAuth();
     const originalRequest = error.config;
 
-     
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
@@ -36,24 +46,28 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await api.post(
+        const res = await api.post(
           "/api/auth/token/refresh",
           {},
           { withCredentials: true }
         );
 
+        const newAccessToken = res.data.accessToken;
+
+         
+        localStorage.setItem("accessToken", newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
         return api(originalRequest);
-      } catch (refreshError) {
-       await logout(resetAuth);
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
+      } catch (err) {
+        await logoutPure();
+    return Promise.reject(err);
       }
     }
 
     return Promise.reject(error);
   }
 );
-
 
 
 export const loginApi = async (email:string, password:string):Promise<LoginResponse>=>{

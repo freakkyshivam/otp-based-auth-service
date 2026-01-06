@@ -71,6 +71,7 @@ export default function LoginForm() {
       setSuccess(`Welcome back ${data.user.name}`);
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem('accessToken',data.accessToken)
       navigate("/dashboard");
     } catch (error) {
       toast.error("Something went wrong. Try again.");
@@ -96,7 +97,7 @@ export default function LoginForm() {
       setSuccess(`Welcome back ${data.user.name}`);
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
-      
+      localStorage.setItem('accessToken',data.accessToken)
       navigate("/dashboard");
      
     } catch (error) {

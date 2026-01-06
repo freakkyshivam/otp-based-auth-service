@@ -149,6 +149,7 @@ export const login = async (req: Request, res: Response) => {
           createdAt : existingUser.createdAt,
           updatedAt : existingUser.updatedAt
         },
+        accessToken
       });
   } catch (error: any) {
     console.error("Server error ", error.message);

@@ -29,9 +29,9 @@ const NavbarMobileMenu = ({handleLogout}:Props) => {
               className="h-9 w-9 cursor-pointer"
               onClick={() => navigate('/dashboard')}
             >
-              <AvatarImage src="" alt={UserInfo.name} />
+              <AvatarImage src="" alt={UserInfo?.name} />
               <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white text-sm font-semibold">
-                {UserInfo.name.slice(0, 2).toUpperCase()}
+                {UserInfo?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           )}
@@ -50,8 +50,8 @@ const NavbarMobileMenu = ({handleLogout}:Props) => {
                 {UserInfo ? (
                   <div className="flex flex-col gap-3 pt-6 border-t border-gray-800">
                     <div className="px-4 py-2">
-                      <p className="text-sm font-medium text-white">{UserInfo.name}</p>
-                      <p className="text-xs text-gray-400">{UserInfo.email}</p>
+                      <p className="text-sm font-medium text-white">{UserInfo?.name}</p>
+                      <p className="text-xs text-gray-400">{UserInfo?.email}</p>
                     </div>
                     <Button 
                       variant="ghost" 

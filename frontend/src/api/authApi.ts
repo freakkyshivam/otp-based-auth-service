@@ -2,37 +2,59 @@
   APIResponse, 
   LoginSuccessResponse, 
   LoginErrorResponse,
-  signupResponse
+  signupResponse,
+  NormalApiResponse
  } from '@/types/types';
 import axios,{AxiosError} from 'axios'
 import {logout} from '@/utils/logout'
- 
+ import { useAuth } from "@/auth/useAuth";
  
 
 type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
 
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, 
   withCredentials:true
 });
 
-api.interceptors.response.use( res=> res, async error=>{
-    if(error.response?.status === 401){
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const { resetAuth } = useAuth();
+    const originalRequest = error.config;
+
+     
+    if (originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest.url.includes("/auth/token/refresh")
+    ) {
+      originalRequest._retry = true;
+
       try {
-        const {data} = await api.post("/api/auth/token/refresh" )
-        console.log(data);
-        
-      } catch (error) {
-        logout()
-         window.location.href = "/login";
-         console.log("Token refresh error ",error);
-         
+        await api.post(
+          "/api/auth/token/refresh",
+          {},
+          { withCredentials: true }
+        );
+
+        return api(originalRequest);
+      } catch (refreshError) {
+       await logout(resetAuth);
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
- }
- )
+  }
+);
+
+
 
 export const loginApi = async (email:string, password:string):Promise<LoginResponse>=>{
       try {
@@ -205,6 +227,50 @@ export const logoutApi = async ()=>{
     const {data} = await api.post('/api/auth/login/verify2fa',{code,type},{
       withCredentials : true
     })
+
+    return data;
+    
+   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+  export const disable2Fa = async(password:string):Promise<NormalApiResponse>=>{
+  try {
+
+    const {data} = await api.post('/api/auth/mfa/disabled',{password},{
+      withCredentials : true
+    })
+ 
+
+    return data;
+    
+   } catch (error : unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+ }
+
+ export const generateNewBackupCodeApi =  async(password:string):Promise<NormalApiResponse>=>{
+  try {
+
+    const {data} = await api.post('/api/auth/mfa/generate-new-backup-codes',{password},{
+      withCredentials : true
+    })
+
 
     return data;
     

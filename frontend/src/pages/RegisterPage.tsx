@@ -27,7 +27,7 @@ import { Eye, EyeOff, UserPlus,AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { signupApi, verifyRegistrationOtpApi } from '@/api/authApi';
 
-import { toast } from 'react-toastify';
+ 
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -83,11 +83,11 @@ const otpForm = useForm<verifyOtpFormData>({
   )
 
     if (!result.success){
-      toast.error(result.msg)
+      setError(result.msg)
       return;
     }
 
-    toast.success(result.msg)
+     
   navigate("/login")
   }
 
@@ -111,8 +111,6 @@ const otpForm = useForm<verifyOtpFormData>({
         </CardHeader>
 
       <CardContent>
-
-        
 
           {step === "REGISTER" ? (
             <form action="" method="post" onSubmit={signupForm.handleSubmit(onSubmit)}>

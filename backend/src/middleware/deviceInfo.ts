@@ -14,6 +14,9 @@ export const deviceInfo = (
     const parser = new UAParser(userAgent);
     const ua = parser.getResult(); 
 
+   
+    
+
     const deviceType = ua.device.type || "desktop";
 
     const deviceName = ua.device.vendor
@@ -33,8 +36,6 @@ export const deviceInfo = (
   req.socket.remoteAddress ||
   null;
 
- 
-
     req.deviceInfo = {
       deviceType,
       deviceName,
@@ -43,6 +44,8 @@ export const deviceInfo = (
       ipAddress,
     };
 
+     
+    
     next();  
   } catch (error) {
     next(error);  

@@ -1,12 +1,14 @@
 import  {  useState } from 'react';
 import {   Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SidebarContent } from '@/components/custom/SidebarContent';
+import { SidebarContent } from '@/components/dashboard/SidebarContent';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import AllSessions from '@/components/custom/AllSessions';
-import Profile from '@/components/custom/Profile';
-import SecurityOverview from '@/components/custom/Overview';
-import TwoFactorSetup from '@/components/custom/TwoFactorLogin';
+import AllSessions from '@/components/dashboard/AllSessions';
+import Profile from '@/components/dashboard/Profile';
+import SecurityOverview from '@/components/dashboard/Overview';
+import TwoFactorSetup from '@/components/dashboard/TwoFactorSetup';
+import LogoutSessionsComponent from '@/components/dashboard/LogoutSessionsComponent';
+import {ChangePasswordComponent} from '@/components/dashboard/ChangePasswordComponents';
  
  
 
@@ -56,11 +58,19 @@ const UserDashboard = () => {
               <AllSessions/>
              )}
              {activeItem === 'Overview' && (
-              <SecurityOverview/>
+              <SecurityOverview setActiveItem={setActiveItem} />
              )}
 
              {activeItem === "Two-Factor Authentication" && (
               <TwoFactorSetup/>
+             )}
+
+             {activeItem === "Logout" && (
+              <LogoutSessionsComponent/>
+             )}
+
+             {activeItem === 'Change Password' && (
+              <ChangePasswordComponent/>
              )}
           </div>
         </main>

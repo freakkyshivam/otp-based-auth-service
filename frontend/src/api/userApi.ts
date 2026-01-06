@@ -1,15 +1,34 @@
- import type { APIResponse, UserSession } from '@/types/types';
- import axios,{AxiosError} from 'axios'
- 
- 
+ import type { APIResponse, Session, UserInfoData } from '@/types/types';
+ import {AxiosError} from 'axios'
+ import { api } from './authApi';
+ export interface SessionsResponse {
+  currentSession: Session;
+  otherSessions: Session[];
+}
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, 
-});
 
-export const allSessions = async (): Promise<APIResponse<UserSession[]>> => {
+export const UserInfoApi = async ():Promise<APIResponse<UserInfoData>>=>{
   try {
-    const { data } = await api.get<APIResponse<UserSession[]>>(
+    const {data} = await api.get('/api/user/me')
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data as APIResponse<UserInfoData>;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+      data: undefined,
+    };
+  }
+}
+
+ 
+
+export const allSessions = async (): Promise<APIResponse<SessionsResponse>> => {
+  try {
+    const { data } = await api.get<APIResponse<SessionsResponse>>(
       "/api/user/sessions",
       { withCredentials: true }
     );
@@ -18,7 +37,30 @@ export const allSessions = async (): Promise<APIResponse<UserSession[]>> => {
     return data;
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
-      return error.response?.data as APIResponse<UserSession[]>;
+      return error.response?.data as APIResponse<SessionsResponse>;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+      data: undefined,
+    };
+  }
+};
+
+export const updatePasswordApi = async (password:string, newPassword:string) => {
+  try {
+    const { data } = await api.post(
+      "/api/user/update-password",
+      {password,newPassword},
+      { withCredentials: true }
+    );
+ 
+    
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data as APIResponse<SessionsResponse>;
     }
 
     return {

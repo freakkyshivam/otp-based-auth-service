@@ -1,9 +1,13 @@
-
+import type { LucideIcon } from "lucide-react";
 export interface User {
   id: string;
   name: string;
   email: string;
   isAccountVerified: boolean;
+  isTwoFactorEnabled : boolean;
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DeviceInfo {
@@ -26,7 +30,7 @@ export interface LoginSuccessResponse {
   success: true;
   msg: string;
   user: User;
-  twoFactorEnabled? : boolean
+  twoFactorEnabled? : boolean,
 }
 
 export interface LoginErrorResponse {
@@ -45,9 +49,14 @@ export interface APIResponse<T> {
   data?: T;
 }
 
+export interface NormalApiResponse {
+   success: boolean;
+  msg: string;
+  data ? : string[] 
+}
 
 
-export interface UserSession {
+export interface Session  {
   id: string;
   userId: string;
   refreshToken: string;
@@ -60,4 +69,30 @@ export interface UserSession {
   lastUsedAt: string;    
   createdAt: string;   
   revokedAt: string | null;
+}
+
+export interface ApiUser {
+  id: string;
+  name: string;
+  email: string;
+  isAccountVerified: boolean;
+  is2fa: boolean;
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+export interface UserInfoData {
+  user: ApiUser;           
+  currentSession: Session;
+  activeSessionCount: string;
+}
+
+
+
+
+export interface SidebarItem {
+  title: string;
+  icon: LucideIcon;
 }

@@ -2,10 +2,10 @@
 import { User2, Lock,  LogOut,Shield,MonitorSmartphone, Key } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/auth/useAuth';
-import {type User } from "@/types/types";
+import {type SidebarItem, type User } from "@/types/types";
 import { getLocalUser } from '@/utils/getLocalUser';
 import { Button } from '@/components/ui/button';
-import { logout } from '@/utils/logout';
+ 
 
 interface SidebarContentProps {
     activeItem: string;
@@ -17,14 +17,14 @@ interface SidebarContentProps {
 
 const UserInfo: User | null = user ?? getLocalUser();
 
-const sidebarItems = [
+const sidebarItems:SidebarItem[] = [
     
     { title: "Overview", icon: Shield },
     { title: "Profile", icon: User2 },
     { title: "Sessions & Devices", icon: MonitorSmartphone },
     { title: "Two-Factor Authentication", icon: Lock },
-    { title: "Change Password", url: "", icon: Key },
-    { title: "Logout", url: "", icon: LogOut },
+    { title: "Change Password", icon: Key },
+    { title: "Logout",  icon: LogOut },
     
   ];
 
@@ -48,7 +48,7 @@ const sidebarItems = [
                 className={`w-full justify-start gap-3 ${
                   isLogout && !isActive ? 'text-red-600 hover:text-red-700 hover:bg-red-50' : ''
                 }`}
-                onClick={() =>item.title === 'Logout'? logout(): setActiveItem(item.title)}
+                onClick={() =>  setActiveItem(item.title)}
               >
                 <Icon size={20} />
                 <span>{item.title}</span>
@@ -62,7 +62,7 @@ const sidebarItems = [
         <div className="flex items-center gap-3 px-2 py-3">
           <Avatar>
             <AvatarImage src="" />
-            <AvatarFallback>{UserInfo?.name.slice(0,2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{UserInfo?.name?.slice(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{UserInfo?.name}</p>

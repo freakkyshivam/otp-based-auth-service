@@ -1,6 +1,8 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
-
+import UserSessions from "../db/schema/user_sessions.schema.js";
+import db from '../db/db.js'
+import { and, eq } from "drizzle-orm";
 export interface AuthRequest extends Request {
   user?: JwtPayload;
 }
@@ -36,6 +38,31 @@ export const authMiddleware = async (
 
     if (!decoded) {
       return res.status(401).json({ success: false, msg: "Invalid token" });
+    }
+
+    const {sid} = decoded;
+
+    if (!sid) {
+  return res.status(401).json({
+    success: false,
+    msg: "Invalid token payload",
+  });
+}
+
+
+    const [session] = await db.select()
+    .from(UserSessions)
+    .where(and(
+      eq(UserSessions.id, sid),
+      eq(UserSessions.isActive, true)
+    ))
+
+   if (!session || session.revokedAt) {
+      return res.status(401).
+      json({
+        success:false,
+        msg:"Session revoked"
+      })
     }
 
     req.user = decoded;

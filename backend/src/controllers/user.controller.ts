@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { and, desc, eq,ne } from "drizzle-orm";
+import { and, desc, eq,ne, sql } from "drizzle-orm";
 
 import db from "../db/db.js";
 import Users from "../db/schema/users.schema.js";
@@ -24,23 +24,52 @@ export const UserInfo = async (req: Request, res: Response) => {
         .json({ success: false, msg: "Session id not found" });
     }
 
+    const currentSession = await db.
+    select()
+    .from(UserSessions)
+    .where(
+      and(
+        eq(UserSessions.id, sid),
+        eq(UserSessions.userId, user.id),
+        eq(UserSessions.isActive, true)
+      )
+    )
+    .limit(1);
+
+    if(!currentSession.length){
+      return res
+        .status(401)
+        .json({ success: false, msg: "Invalid or expired session" });
+    }
+
+    const avtiveSessionCount = await db.
+    select({
+      count: sql<number>`count(*)`
+    })
+    .from(UserSessions)
+    .where((
+      and(
+        eq(UserSessions.userId, user.id),
+        eq(UserSessions.isActive, true)
+      )
+    ))
+
     const result = await db
       .select({
-        user: Users,
-        session: UserSessions,
+        id : Users.id,
+        name : Users.name,
+        email : Users.email,
+        isAccountVerified : Users.isAccountVerified,
+        is2fa : Users.is2fa,
+        lastLoginAt : Users.lastLoginAt,
+        createdAt : Users.createdAt,
+        updatedAt : Users.updatedAt
       })
       .from(Users)
-      .innerJoin(
-        UserSessions,
-        and(
-          eq(UserSessions.userId, Users.id),
-          eq(UserSessions.id, sid),
-          eq(UserSessions.isActive, true)
-        )
-      )
-      .where(eq(Users.id, user.id));
+      .where(eq(Users.id, user.id))
+      .limit(1);
 
-    if (!result.length) {
+    if (!result) {
       return res
         .status(401)
         .json({ success: false, msg: "Invalid or expired session" });
@@ -48,8 +77,12 @@ export const UserInfo = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      user: result[0].user,
-      session: result[0].session,
+      data : {
+        user: result[0],
+      currentSession : currentSession[0],
+      activeSessionCount :avtiveSessionCount[0].count
+      }
+      
     });
   } catch (error: any) {
     console.error("User info fetching error:", error.message);
@@ -78,13 +111,24 @@ export const allSessions = async (req: Request, res: Response) => {
       .where(
         and(
            eq(UserSessions.userId, user.id),
-           ne(UserSessions.id, sid)
+            eq(UserSessions.isActive, true)
         )
        );
+       
+       const currentSession = sessions.find(
+        s=> s.id === sid
+       )
+
+       const otherSessions = sessions.filter(
+  s => s.id !== sid
+);
 
     return res.status(200).json({
       success: true,
-     data: sessions,
+     data: {
+      currentSession,
+      otherSessions
+     },
     });
   } catch (error: any) {
     console.error("User session fetching error:", error.message);
@@ -125,6 +169,28 @@ export const changePassword = async (req: Request, res: Response) => {
         .json({ success: false, msg: "Password are required" });
     }
 
+    const [existingUser] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.id, user.id))
+       
+       
+
+      if(!existingUser){
+        return res.status(400).json({
+          success:false,
+          msg:"Something went wrong"
+        })
+      }
+
+    const isValid = await argon2.verify(existingUser.password, password)
+
+    if(!isValid){
+      return res.status(400).json({
+        success:false,
+        msg:"Wrong password"
+      })
+    }
     const hashedPassword = await argon2.hash(newPassword);
 
     const [updatedUser] = await db
@@ -135,7 +201,7 @@ export const changePassword = async (req: Request, res: Response) => {
 
     return res
       .status(200)
-      .json({ success: true, msg: "Password upadated successfully" });
+      .json({ success: true, msg: "Password upadated successfully 123" });
   } catch (error: any) {
     console.error("Server error ", error.message);
     return res.status(500).json({ msg: "Server error", error: error.message });

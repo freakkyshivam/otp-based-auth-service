@@ -83,10 +83,13 @@ export const login = async (req: Request, res: Response) => {
         });
     }
 
+     const sessionId = crypto.randomUUID();
+
     const accessToken = await generateAccessToken(
       existingUser.id,
       existingUser.email,
-      existingUser.is2fa
+      existingUser.is2fa,
+      sessionId
     );
     const refreshToken = await generateRefreshToken(
       existingUser.id,
@@ -102,9 +105,9 @@ export const login = async (req: Request, res: Response) => {
       .where(eq(Users.email, email));
 
     const hashedRefreshToken = await argon2.hash(refreshToken as string);
-    const sessionId = crypto.randomUUID();
+   
     const device = req.deviceInfo;
-
+ 
     await db.insert(UserSessions).values({
       id: sessionId,
       userId: existingUser.id,
@@ -141,6 +144,10 @@ export const login = async (req: Request, res: Response) => {
           name: existingUser.name,
           email: existingUser.email,
           isAccountVerified: existingUser.isAccountVerified,
+          isTwoFactorEnabled : existingUser.is2fa,
+          lastLoginAt : existingUser.lastLoginAt,
+          createdAt : existingUser.createdAt,
+          updatedAt : existingUser.updatedAt
         },
       });
   } catch (error: any) {
@@ -232,11 +239,12 @@ export const verify2faLogin = async (req: Request, res: Response) => {
     }
 
     
-
+const sessionId = crypto.randomUUID();
     const accessToken = await generateAccessToken(
       existingUser.id,
       existingUser.email,
-      existingUser.is2fa
+      existingUser.is2fa,
+      sessionId
     );
     const refreshToken = await generateRefreshToken(
       existingUser.id,
@@ -252,9 +260,11 @@ export const verify2faLogin = async (req: Request, res: Response) => {
       .where(eq(Users.email, user.email));
 
     const hashedRefreshToken = await argon2.hash(refreshToken as string);
-    const sessionId = crypto.randomUUID();
+    
     const device = req.deviceInfo;
 
+ 
+  
     await db.insert(UserSessions).values({
       id: sessionId,
       userId: existingUser.id,
@@ -288,11 +298,15 @@ export const verify2faLogin = async (req: Request, res: Response) => {
       .json({
         success: true,
         msg: "User login successfully",
-        user: {
+       user: {
           id: existingUser.id,
           name: existingUser.name,
           email: existingUser.email,
           isAccountVerified: existingUser.isAccountVerified,
+          isTwoFactorEnabled : existingUser.is2fa,
+          lastLoginAt : existingUser.lastLoginAt,
+          createdAt : existingUser.createdAt,
+          updatedAt : existingUser.updatedAt
         },
       });
   } catch (error: any) {

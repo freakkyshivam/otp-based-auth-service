@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 
-export const generateAccessToken = async (id:string, email: string,is2fa:boolean | null)=>{
+export const generateAccessToken = async (id:string, email: string,is2fa:boolean | null, sid:string)=>{
    try {
      const payload = {
         id,
         email,
-        is2fa
+        is2fa,
+        sid
     }
     const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,{expiresIn:"15m"})
     return token;

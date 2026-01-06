@@ -1,6 +1,10 @@
+// logout.ts
 import { logoutApi } from "@/api/authApi";
-export async function  logout() {
-    await logoutApi()
-  localStorage.clear();  
+import type { AuthContextType } from "@/auth/UserContext";
+
+export async function logout(resetAuth: AuthContextType["resetAuth"]) {
+  await logoutApi();
+  localStorage.clear();
+  resetAuth();
   window.location.href = "/login";
 }

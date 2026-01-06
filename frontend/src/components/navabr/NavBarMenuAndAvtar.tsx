@@ -32,9 +32,9 @@ const NavBarMenuAndAvtar = ({handleLogout}:Props) => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                   <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-transparent hover:ring-blue-500 transition-all duration-300">
-                    <AvatarImage src="" alt={UserInfo.name} />
+                    <AvatarImage src="" alt={UserInfo?.name} />
                     <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white font-semibold">
-                      {UserInfo.name.slice(0, 2).toUpperCase()}
+                      {UserInfo?.name?.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -42,8 +42,8 @@ const NavBarMenuAndAvtar = ({handleLogout}:Props) => {
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{UserInfo.name}</p>
-                    <p className="text-xs text-muted-foreground">{UserInfo.email}</p>
+                    <p className="text-sm font-medium">{UserInfo?.name}</p>
+                    <p className="text-xs text-muted-foreground">{UserInfo?.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

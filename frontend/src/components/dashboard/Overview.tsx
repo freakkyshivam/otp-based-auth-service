@@ -1,12 +1,10 @@
 import { Shield, CheckCircle, XCircle, Smartphone, Clock, AlertTriangle, Lock, LogIn, Key, UserX } from 'lucide-react';
-
-// Types
-interface LastLogin {
-  timestamp: string;
-  device: string;
-  browser: string;
-  os: string;
-}
+import { useAuth } from '@/auth/useAuth';
+import { getLocalUser } from '@/utils/getLocalUser';
+import { type User} from '@/types/types';
+import { useEffect } from 'react';
+import { fetchUser } from '@/utils/fetchAndSaveUserInLocal';
+import formatDate from '@/utils/formatdate';
 
 interface SecurityEvent {
   id: string;
@@ -15,19 +13,7 @@ interface SecurityEvent {
   timestamp: string;
   device?: string;
 }
-
-interface OverviewData {
-  emailVerified: boolean;
-  twoFactorEnabled: boolean;
-  activeSessionsCount: number;
-  lastLogin: LastLogin;
-  currentSession: {
-    browser: string;
-    os: string;
-  };
-  recentActivity: SecurityEvent[];
-}
-
+ 
 type WarningType = "email" | "2fa" | "sessions";
 
 interface SecurityWarning {
@@ -37,22 +23,8 @@ interface SecurityWarning {
 }
 
 
-// Placeholder data
-const SECURITY_DATA: OverviewData = {
-  emailVerified: true,
-  twoFactorEnabled: false,
-  activeSessionsCount: 2,
-  lastLogin: {
-    timestamp: '28 Dec 2025, 2:30 PM',
-    device: 'Desktop',
-    browser: 'Chrome',
-    os: 'Windows',
-  },
-  currentSession: {
-    browser: 'Chrome',
-    os: 'Windows',
-  },
-  recentActivity: [
+ 
+  const recentActivity : SecurityEvent[] = [
     {
       id: '1',
       type: 'login',
@@ -95,17 +67,26 @@ const SECURITY_DATA: OverviewData = {
       timestamp: '3 days ago',
       device: 'Chrome (Windows)',
     },
-  ],
-};
-
+  ]
+interface SidebarProps {
+  setActiveItem: (item: string) => void;
+}
 // Main Component
-export default function SecurityOverview() {
-  const data = SECURITY_DATA;
+export default function SecurityOverview({setActiveItem}:SidebarProps) {
+
+  const { user,currentSession,activeSessionCount,setUser,setCurrentSession,setActiveSessionCount } = useAuth();
+         
+
+         useEffect(  ()=>{
+             fetchUser(setUser, setCurrentSession,setActiveSessionCount)
+         },[])
+
+ const UserInfo: User | null = user ?? getLocalUser();
 
   // Calculate overall security status
   const getSecurityStatus = (): 'secure' | 'warning' | 'risk' => {
-    if (!data.emailVerified || !data.twoFactorEnabled) return 'risk';
-    if (data.activeSessionsCount > 3) return 'warning';
+    if (!UserInfo?.isAccountVerified|| !UserInfo.isTwoFactorEnabled) return 'risk';
+    if (activeSessionCount > 3) return 'warning';
     return 'secure';
   };
 
@@ -136,7 +117,7 @@ export default function SecurityOverview() {
   // Check for warnings
 const warnings: SecurityWarning[] = [];
 
-if (!data.emailVerified) {
+if (!UserInfo?.isAccountVerified) {
   warnings.push({
     type: "email",
     message: "Email not verified",
@@ -144,7 +125,7 @@ if (!data.emailVerified) {
   });
 }
 
-if (!data.twoFactorEnabled) {
+if (!UserInfo?.isTwoFactorEnabled) {
   warnings.push({
     type: "2fa",
     message: "Two-factor authentication disabled",
@@ -152,13 +133,15 @@ if (!data.twoFactorEnabled) {
   });
 }
 
-if (data.activeSessionsCount > 3) {
+if (activeSessionCount > 3) {
   warnings.push({
     type: "sessions",
-    message: `${data.activeSessionsCount} active sessions detected`,
+    message: `${activeSessionCount} active sessions detected`,
     action: "Review your active sessions",
   });
 }
+const date = UserInfo?.lastLoginAt ?? "";
+const lastLogin = formatDate(date);
 
 
   return (
@@ -212,8 +195,8 @@ if (data.activeSessionsCount > 3) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Email Verification */}
             <div className="flex items-start gap-2 p-3 bg-gray-800/60 rounded-lg border border-gray-700">
-              <div className={`p-1.5 rounded-lg ${data.emailVerified ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                {data.emailVerified ? (
+              <div className={`p-1.5 rounded-lg ${UserInfo?.isAccountVerified ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                {UserInfo?.isAccountVerified ? (
                   <CheckCircle className="w-4 h-4 text-green-400" />
                 ) : (
                   <XCircle className="w-4 h-4 text-red-400" />
@@ -221,21 +204,21 @@ if (data.activeSessionsCount > 3) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-400">Email Status</p>
-                <p className={`text-xs font-semibold ${data.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.emailVerified ? 'Verified' : 'Not Verified'}
+                <p className={`text-xs font-semibold ${UserInfo?.isAccountVerified ? 'text-green-400' : 'text-red-400'}`}>
+                  {UserInfo?.isAccountVerified ? 'Verified' : 'Not Verified'}
                 </p>
               </div>
             </div>
 
             {/* 2FA Status */}
             <div className="flex items-start gap-2 p-3 bg-gray-800/60 rounded-lg border border-gray-700">
-              <div className={`p-1.5 rounded-lg ${data.twoFactorEnabled ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                <Lock className={`w-4 h-4 ${data.twoFactorEnabled ? 'text-green-400' : 'text-red-400'}`} />
+              <div className={`p-1.5 rounded-lg ${UserInfo?.isTwoFactorEnabled ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <Lock className={`w-4 h-4 ${UserInfo?.isTwoFactorEnabled? 'text-green-400' : 'text-red-400'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-400">Two-Factor Auth</p>
-                <p className={`text-xs font-semibold ${data.twoFactorEnabled ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                <p className={`text-xs font-semibold ${UserInfo?.isTwoFactorEnabled ? 'text-green-400' : 'text-red-400'}`}>
+                  {UserInfo?.isTwoFactorEnabled ? 'Enabled' : 'Disabled'}
                 </p>
               </div>
             </div>
@@ -247,7 +230,7 @@ if (data.activeSessionsCount > 3) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-400">Active Sessions</p>
-                <p className="text-xs font-semibold text-white">{data.activeSessionsCount} devices</p>
+                <p className="text-xs font-semibold text-white">{activeSessionCount} devices</p>
               </div>
             </div>
 
@@ -258,8 +241,8 @@ if (data.activeSessionsCount > 3) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-400">Last Login</p>
-                <p className="text-xs font-semibold text-white">{data.lastLogin.timestamp}</p>
-                <p className="text-xs text-gray-500">{data.lastLogin.browser} ({data.lastLogin.os})</p>
+                <p className="text-xs font-semibold text-white">{lastLogin}</p>
+                <p className="text-xs text-gray-500">{currentSession?.browser} ({currentSession?.os})</p>
               </div>
             </div>
           </div>
@@ -276,7 +259,7 @@ if (data.activeSessionsCount > 3) {
                 Two-Factor Authentication
               </h2>
 
-              {data.twoFactorEnabled ? (
+              {UserInfo?.isTwoFactorEnabled ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-green-400">
                     <CheckCircle className="w-4 h-4" />
@@ -297,7 +280,9 @@ if (data.activeSessionsCount > 3) {
                       </p>
                     </div>
                   </div>
-                  <button className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  <button className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  onClick={()=>setActiveItem('Two-Factor Authentication')}
+                  >
                     Enable 2FA
                   </button>
                 </div>
@@ -313,7 +298,7 @@ if (data.activeSessionsCount > 3) {
 
               <div className="space-y-3">
                 <div className="text-center py-3">
-                  <div className="text-3xl font-bold text-white">{data.activeSessionsCount}</div>
+                  <div className="text-3xl font-bold text-white">{activeSessionCount}</div>
                   <div className="text-xs text-gray-400">Total Active Sessions</div>
                 </div>
 
@@ -323,12 +308,14 @@ if (data.activeSessionsCount > 3) {
                     <span className="text-xs font-medium text-gray-400 uppercase">Current Session</span>
                   </div>
                   <p className="text-sm font-semibold text-white">
-                    {data.currentSession.browser} on {data.currentSession.os}
+                    {currentSession?.browser} on {currentSession?.os}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">This device</p>
                 </div>
 
-                <button className="w-full px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors border border-gray-700">
+                <button className="w-full px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors border border-gray-700"
+                onClick={()=>setActiveItem('Sessions & Devices')}
+                >
                   View All Sessions
                 </button>
               </div>
@@ -343,7 +330,7 @@ if (data.activeSessionsCount > 3) {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {data.recentActivity.map((event) => (
+              {recentActivity.map((event) => (
                 <div key={event.id} className="flex items-start gap-2 p-3 bg-gray-800/60 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
                   <div className="shrink-0">{getEventIcon(event.type)}</div>
                   <div className="flex-1 min-w-0">

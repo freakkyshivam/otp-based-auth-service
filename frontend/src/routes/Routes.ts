@@ -16,7 +16,6 @@ const router = createBrowserRouter([
       { path: "register", Component: RegisterPage },
       { path: "dashboard", Component: UserDashboard },
       { path: "404", Component: Page404 },
-       
     ],
   },
 ]);

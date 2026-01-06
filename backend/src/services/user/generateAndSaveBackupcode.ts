@@ -6,7 +6,7 @@ import db
 export const generateAndSaveBackupCode = async (id:string)=>{
     const plainBackupCodes: string[] = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
      const code = generateBackupCode();
   plainBackupCodes.push(code);
       const hash = await argon2.hash(code, {

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Shield } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import NavBarMenuAndAvtar from '@/components/custom/NavBarMenuAndAvtar';
-import NavbarMobileMenu from '@/components/custom/NavbarMobileMenu';
+import NavBarMenuAndAvtar from '@/components/navabr/NavBarMenuAndAvtar';
+import NavbarMobileMenu from '@/components/navabr/NavbarMobileMenu';
 import { logout } from '@/utils/logout';
- 
+ import { useAuth } from '@/auth/useAuth';
 const NavBar = () => {
   const [scrollY, setScrollY] = useState(0);
 
    const navigate = useNavigate();  
- 
+ const { resetAuth } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -17,10 +17,10 @@ const NavBar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log('Logging out...');
-    logout();
-    // Add your logout logic here
+    await logout(resetAuth);
+     
   };
 
  
@@ -49,7 +49,7 @@ const NavBar = () => {
           </div>
         </div>
 
-        <h1 className='font bold text-2xl text-red-600'>The project is currently under development.</h1>
+         
 
          <NavBarMenuAndAvtar handleLogout={handleLogout}/>
       <NavbarMobileMenu handleLogout={handleLogout}/>

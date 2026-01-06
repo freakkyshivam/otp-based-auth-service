@@ -7,6 +7,9 @@ import { eq } from "drizzle-orm";
 import authenticator from "../../config/otplib.js";
 import { encryptSecret, decryptSecret } from "../../utils/crypto.util.js";
 import { generateAndSaveBackupCode } from "../../services/user/generateAndSaveBackupcode.js";
+import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
+import z from "zod";
+import  argon2 from "argon2";
 
 
 export const setup2fa = async (req: Request, res: Response) => {
@@ -114,8 +117,7 @@ export const verify2faSetup = async (req: Request, res: Response) => {
     await redis.del(`2fa:setup:${user.id}`);
 
     const plainBackupCodes = await generateAndSaveBackupCode(user.id)
-
-    console.log(plainBackupCodes);
+ 
     
 
     return res.status(200).json({
@@ -132,3 +134,162 @@ export const verify2faSetup = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const disable2Fa = async (req:Request, res:Response)=>{
+  try {
+
+    const authUser = req.user;
+
+    if(!authUser?.id){
+      return res.status(401).json({
+        success:false,
+        msg:"Unauthorized"
+      })
+    }
+
+    const [user] = await db.select()
+    .from(Users)
+    .where(eq(Users.id,authUser.id))
+
+    if(!user){
+    return res.status(400).json({
+       success:false,
+      msg:"Something went wrong"
+    })
+  }
+
+    if(!user.is2fa){
+      return res.status(400).json({
+        success:false,
+        msg:"Two factor authentication is already disabled"
+      })
+    }
+
+    const {password} = req.body;
+
+  if(!password){
+    return res.status(400).json({
+      success:false,
+      msg:"Password are required for disable 2FA"
+    })
+  }
+
+   
+
+  
+
+  const isValid = await argon2.verify(user.password,password)
+
+  if(!isValid){
+     return res.status(400).json({
+      success:false,
+      msg:"Invalid password"
+    })
+  }
+
+    await db.transaction(async (tx)=>{
+         await tx.update(Users)
+    .set({
+      is2fa : false,
+      twoFactorSecret : null,
+      twoFactorNonce : null
+    }).where(eq(Users.id, authUser.id))
+
+    await tx.delete(backupCodesTable).where(eq(backupCodesTable.userId, authUser.id))
+    })
+
+    return res.status(200).json({
+      success:true,
+      msg:"Two factor authentication has been disabled"
+    })
+    
+  } catch (error: any) {
+    console.log("Internal server error (2FA disabled) ", error.message);
+
+    return res.status(500).json({
+      success: true,
+      msg: "Something went wrong",
+    });
+  }
+}
+
+export const generateNewBackupCode = async (req:Request, res:Response)=>{
+  try {
+
+    const authUser = req.user;
+
+    if(!authUser?.id){
+      return res.status(401).json({
+        success:false,
+        msg:"Unauthorized"
+      })
+    }
+
+    if(!authUser.is2fa){
+      return res.status(400).json({
+        success:false,
+        msg:"Two factor authentication is not enabled"
+      })
+    }
+
+      const [user] = await db.select()
+    .from(Users)
+    .where(eq(Users.id,authUser.id))
+
+    if(!user){
+    return res.status(400).json({
+       success:false,
+      msg:"Something went wrong"
+    })
+  }
+
+    if(!user.is2fa){
+      return res.status(400).json({
+        success:false,
+        msg:"Two factor authentication is not enable"
+      })
+    }
+
+     const {password} = req.body;
+
+  if(!password){
+    return res.status(400).json({
+      success:false,
+      msg:"Password are required for disable 2FA"
+    })
+  }
+
+ 
+
+  const isValid = await argon2.verify(user.password,password)
+
+  if(!isValid){
+     return res.status(400).json({
+      success:false,
+      msg:"Invalid password"
+    })
+  }
+
+    await db.
+    delete(backupCodesTable).
+    where(
+      eq(backupCodesTable.userId, authUser.id)
+    )
+
+    const plainBackupCodes = await generateAndSaveBackupCode(authUser.id)
+
+    return res.status(200).json({
+      success:true,
+      data : plainBackupCodes,
+      msg:"New backupcodes generated"
+    })
+    
+ } catch (error: any) {
+    console.log("Internal server error (New backupcode generation error) ", error.message);
+
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+    });
+  }
+}

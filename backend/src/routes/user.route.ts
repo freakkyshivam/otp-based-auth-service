@@ -7,5 +7,5 @@ const router:RouterType  = Router();
 
 router.get('/me',authMiddleware,UserInfo);
 router.get('/sessions',authMiddleware,allSessions);
-router.post('/change-password', authMiddleware, changePassword)
+router.post('/update-password', authMiddleware, changePassword)
 export default router;

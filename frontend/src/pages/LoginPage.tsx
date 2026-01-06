@@ -96,6 +96,7 @@ export default function LoginForm() {
       setSuccess(`Welcome back ${data.user.name}`);
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
+      
       navigate("/dashboard");
      
     } catch (error) {
@@ -122,7 +123,7 @@ export default function LoginForm() {
         <div className="absolute bottom-20 left-1/3 w-72 h-72 bg-pink-600 rounded-full mix-blend-lighten filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
       </div>
 
-      <Card className="w-full max-w-md relative z-10 bg-transparent">
+      <Card className="w-full max-w-md relative bg-card/40 backdrop-blur-2xl">
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-blue-100 rounded-lg">

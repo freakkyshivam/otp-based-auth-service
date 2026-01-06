@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Shield, Smartphone, Copy, CheckCircle, XCircle, AlertTriangle, Key, Download, Check } from 'lucide-react';
 import { twoFASetupApi,verifyFASetupApi } from '@/api/authApi';
-
+import { useAuth } from '@/auth/useAuth';
+ import {type User } from "@/types/types";
+import { getLocalUser } from '@/utils/getLocalUser';
+import Manage2FAEnabled from './Manage2FAEnabled';
+import { fetchUser } from '@/utils/fetchAndSaveUserInLocal';
 export default function TwoFactorSetup() {
   const [currentStep, setCurrentStep] = useState(1);
   const [verificationCode, setVerificationCode] = useState('');
@@ -77,6 +81,23 @@ export default function TwoFactorSetup() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+    const { user,setUser,setCurrentSession,setActiveSessionCount } = useAuth();
+       const UserInfo: User | null = user ?? getLocalUser();
+
+ 
+
+  const handleOnclick = async ()=>{
+      await fetchUser(setUser,setCurrentSession,setActiveSessionCount)
+  }
+
+   if(UserInfo?.isTwoFactorEnabled){
+    console.log("called");
+    
+    return(
+      <Manage2FAEnabled UserInfo={UserInfo}/>
+    )
+  }
 
   return (
     <div className="h-screen overflow-hidden bg-transparent p-4 ml-16">
@@ -285,7 +306,7 @@ export default function TwoFactorSetup() {
                 </div>
 
                 <button
-                  onClick={() => console.log('Setup complete')}
+                  onClick={handleOnclick }
                   className="mt-4 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-green-500/30 w-full"
                 >
                   Complete Setup

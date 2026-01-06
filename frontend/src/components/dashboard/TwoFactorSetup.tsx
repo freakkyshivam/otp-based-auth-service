@@ -184,7 +184,7 @@ export default function TwoFactorSetup() {
                   onClick={handleGenerateQrCode}
                   className="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-blue-500/30 w-full"
                 >
-                  Next: Scan QR Code
+                 { loading ? "Generating QR Code ..." : "Next: Scan QR Code" }
                 </button>
               </div>
             )}

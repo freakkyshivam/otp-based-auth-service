@@ -145,7 +145,7 @@ const lastLogin = formatDate(date);
 
 
   return (
-    <div className="bg-transparent p-4 ml-16 ">
+    <div className="bg-transparent p-4 ml-auto ">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Header */}
         <div className="mb-4">

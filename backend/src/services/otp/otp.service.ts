@@ -1,9 +1,12 @@
 
-import {redis} from '../../config/redis.js'
+import {getRedis} from '../../config/redis.js'
 import {generateOtp, hashOtp, compareOtp} from '../../utils/otp.js'
 import { OTP_TTL,MAX_OTP_ATTEMPTS,getOtpKey } from './otp.constraint.js'
 
 import {SendOtpInput,VerifyOtpInput,VerifyOtpResult} from "./otp.types.js"
+
+const redis = await getRedis();
+
 
 export async function storeOtpInRedis({
     identifier,

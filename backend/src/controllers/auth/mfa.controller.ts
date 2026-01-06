@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
 import { generateQr } from "../../utils/qr.js";
-import { redis } from "../../config/redis.js";
+import { getRedis } from "../../config/redis.js";
 import db from "../../db/db.js";
 import Users from "../../db/schema/users.schema.js";
 import { eq } from "drizzle-orm";
@@ -11,6 +11,7 @@ import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 import z from "zod";
 import  argon2 from "argon2";
 
+const redis = await getRedis();
 
 export const setup2fa = async (req: Request, res: Response) => {
   try {

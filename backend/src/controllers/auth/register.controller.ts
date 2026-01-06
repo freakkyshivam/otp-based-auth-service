@@ -13,8 +13,9 @@ import {
   
 } from "../../validation/validation.js";
 
-import { redis } from "../../config/redis.js";
+import { getRedis } from "../../config/redis.js";
  
+const redis = await getRedis();
 
 import { findUserByEmail } from "../../services/user/user.service.js";
  

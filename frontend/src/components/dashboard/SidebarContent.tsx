@@ -30,9 +30,9 @@ const sidebarItems:SidebarItem[] = [
 
     return (
     <div className="flex flex-col h-full">
-      <div className="p-6 border-b">
+      {/* <div className="p-6 border-b">
         <h2 className="text-2xl font-bold">Dashboard</h2>
-      </div>
+      </div> */}
 
       <nav className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-2">

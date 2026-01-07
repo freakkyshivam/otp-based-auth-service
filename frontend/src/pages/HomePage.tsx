@@ -354,9 +354,9 @@ const HomePage = () => {
             <div>
               <h4 className="font-bold mb-4 text-white text-lg">Resources</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="https://freakkyshivam.netlify.app/" className="hover:text-blue-400 transition-colors flex items-center gap-2 group">
+                {/* <li><a href="https://freakkyshivam.netlify.app/" className="hover:text-blue-400 transition-colors flex items-center gap-2 group">
                   Portfolio <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </a></li>
+                </a></li> */}
                 <li><a href="https://documenter.getpostman.com/view/47278131/2sBXVbGDPJ" className="hover:text-blue-400 transition-colors flex items-center gap-2 group">
                   Documentation <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a></li>

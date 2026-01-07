@@ -10,6 +10,7 @@ import { generateAndSaveBackupCode } from "../../services/user/generateAndSaveBa
 import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 import z from "zod";
 import  argon2 from "argon2";
+import { enqueueMail } from "../../queues/mail.queue.js";
 
 const redis = await getRedis();
 
@@ -121,11 +122,17 @@ export const verify2faSetup = async (req: Request, res: Response) => {
  
     
 
+    // Send 2FA enable alert email
+    await enqueueMail("TWO_FA_ENABLE_ALERT", {
+      name: user.name,
+      email: user.email,
+    });
+
     return res.status(200).json({
-  success: true,
-  msg: "Two factor authentication is enabled",
-  backupCodes: plainBackupCodes,
-});
+      success: true,
+      msg: "Two factor authentication is enabled",
+      backupCodes: plainBackupCodes,
+    });
   } catch (error: any) {
     console.log("Internal server error (2FA verification) ", error.message);
 
@@ -198,6 +205,12 @@ export const disable2Fa = async (req:Request, res:Response)=>{
 
     await tx.delete(backupCodesTable).where(eq(backupCodesTable.userId, authUser.id))
     })
+
+    // Send 2FA disable alert email
+    await enqueueMail("TWO_FA_DISABLE_ALERT", {
+      name: user.name,
+      email: user.email,
+    });
 
     return res.status(200).json({
       success:true,

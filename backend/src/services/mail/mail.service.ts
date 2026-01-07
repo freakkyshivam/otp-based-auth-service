@@ -4,8 +4,9 @@ import {
    accountVerificationTemplate,
    passwordResetTemplate,
    passwordResetAlertTemplate,
-   twoFactorAuthTemplate,
-   welcomeTemplate
+   welcomeTemplate,
+   twoFactorEnableAlertTemplate,
+   twoFactorDisableAlertTemplate
    } from "./mail.templates.js";
 
  
@@ -80,12 +81,28 @@ export async function sendPasswordRestAlertEmail(
   return info.messageId;
 }
 
-export async function sendTwoFactorAuthEmail(
+export async function sendTwoFactorEnableAlertEmail(
   name: string | undefined,
   email: string,
-  otp: string
 ) {
-  const template = twoFactorAuthTemplate( {name,otp} );
+  const template = twoFactorEnableAlertTemplate({ name });
+
+  const info = await transporter.sendMail({
+    from: `"Shivam Chaudhary" <${process.env.SENDER_EMAIL}>`,
+    to: email,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+  });
+
+  return info.messageId;
+}
+
+export async function sendTwoFactorDisableAlertEmail(
+  name: string | undefined,
+  email: string,
+) {
+  const template = twoFactorDisableAlertTemplate({ name });
 
   const info = await transporter.sendMail({
     from: `"Shivam Chaudhary" <${process.env.SENDER_EMAIL}>`,

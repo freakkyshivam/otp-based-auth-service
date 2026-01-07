@@ -23,6 +23,7 @@ import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
+    console.time("Start")
     const validationResult = await loginValidation.safeParseAsync(req.body);
 
     if (validationResult.error) {
@@ -120,7 +121,8 @@ export const login = async (req: Request, res: Response) => {
       browser: req.deviceInfo?.browser ?? null,
       ipAddress: req.deviceInfo?.ipAddress ?? null,
     });
-
+   
+    console.timeEnd('Start')
     return res
       .cookie("refreshToken", refreshToken, {
         ...cookieOptions,
@@ -309,6 +311,7 @@ const sessionId = crypto.randomUUID();
           createdAt : existingUser.createdAt,
           updatedAt : existingUser.updatedAt
         },
+        accessToken: accessToken,
       });
   } catch (error: any) {
     console.error("Server error (2FA login error ) ", error.message);

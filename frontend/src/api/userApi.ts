@@ -55,12 +55,34 @@ export const updatePasswordApi = async (password:string, newPassword:string) => 
       {password,newPassword},
       { withCredentials: true }
     );
- 
-    
+
+
     return data;
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
       return error.response?.data as APIResponse<SessionsResponse>;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+      data: undefined,
+    };
+  }
+};
+
+export const updateProfileApi = async (name: string) => {
+  try {
+    const { data } = await api.put(
+      "/api/user/update-profile",
+      { name },
+      { withCredentials: true }
+    );
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data as APIResponse<UserInfoData>;
     }
 
     return {

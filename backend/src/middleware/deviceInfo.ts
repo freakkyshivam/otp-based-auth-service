@@ -31,10 +31,8 @@ export const deviceInfo = (
       ? `${ua.browser.name} ${ua.browser.version ?? ""}`
       : "Unknown Browser";
 
-    const ipAddress =
-  req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
-  req.socket.remoteAddress ||
-  null;
+    const ipAddress = req.headers["x-forwarded-for"]?.toString().split(",")[0]
+
 
     req.deviceInfo = {
       deviceType,

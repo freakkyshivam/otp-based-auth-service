@@ -15,6 +15,7 @@ type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, 
+  withCredentials:true
 });
 
 api.interceptors.request.use((config) => {
@@ -46,6 +47,9 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        // #region agent log
+        console.log('[DEBUG] Refreshing token', { url: originalRequest.url });
+        // #endregion
         const res = await api.post(
           "/api/auth/token/refresh",
           {},
@@ -53,6 +57,12 @@ api.interceptors.response.use(
         );
 
         const newAccessToken = res.data.accessToken;
+        // #region agent log
+        console.log('[DEBUG] Token refreshed', { 
+          hasAccessToken: !!newAccessToken,
+          setCookieHeaders: res.headers['set-cookie'] || 'none'
+        });
+        // #endregion
 
          
         localStorage.setItem("accessToken", newAccessToken);
@@ -72,11 +82,20 @@ api.interceptors.response.use(
 
 export const loginApi = async (email:string, password:string):Promise<LoginResponse>=>{
       try {
-        const {data} = await api.post(`/api/auth/login`,{
+        // #region agent log
+        console.log('[DEBUG] Login API called', { email, hasCredentials: true });
+        // #endregion
+        const {data, headers} = await api.post(`/api/auth/login`,{
           email ,
           password
-        } )
-        console.log(data);
+        },{withCredentials:true} )
+        // #region agent log
+        console.log('[DEBUG] Login response', { 
+          success: data?.success, 
+          hasAccessToken: !!data?.accessToken,
+          setCookieHeaders: headers['set-cookie'] || 'none'
+        });
+        // #endregion
         
         return data;
       } catch (error : unknown) {
@@ -287,7 +306,7 @@ export const logoutApi = async ()=>{
 
 
     return data;
-    
+
    } catch (error : unknown) {
     if (error instanceof AxiosError) {
       return error.response?.data;
@@ -299,3 +318,54 @@ export const logoutApi = async ()=>{
     };
   }
  }
+
+ export const sendPasswordResetOtpApi = async (email: string): Promise<NormalApiResponse> => {
+  try {
+    const { data } = await api.post('/api/auth/password/reset-otp', { email });
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+};
+
+export const verifyResetOtpApi = async (email: string, otp: string): Promise<NormalApiResponse> => {
+  try {
+    const { data } = await api.post('/api/auth/password/verify-otp', { email, otp });
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+};
+
+export const resetPasswordApi = async (email: string, otp: string, newPassword: string): Promise<NormalApiResponse> => {
+  try {
+    const { data } = await api.post('/api/auth/password/reset', { email, otp, newPassword });
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return error.response?.data;
+    }
+
+    return {
+      success: false,
+      msg: "Something went wrong",
+    };
+  }
+};

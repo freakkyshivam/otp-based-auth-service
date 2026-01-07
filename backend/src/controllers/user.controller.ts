@@ -104,6 +104,12 @@ export const allSessions = async (req: Request, res: Response) => {
 
     const {sid} = req.cookies;
 
+    if (!sid) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Session id not found" });
+    }
+
     const sessions = await db
       .select()
       .from(UserSessions)
@@ -208,7 +214,9 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-export const updateName = async (req: Request, res: Response) => {
+ 
+
+export const updateProfile = async (req:Request, res:Response)=>{
   try {
     const user = req.user;
 
@@ -230,29 +238,48 @@ export const updateName = async (req: Request, res: Response) => {
         });
     }
 
-    const { name} = validationResult.data;
+    const { name } = validationResult.data;
 
     if (!name) {
       return res
         .status(400)
-        .json({ success: false, msg: "Password are required" });
+        .json({ success: false, msg: "Name is required" });
     }
 
-      await db
+    const [updatedUser] = await db
       .update(Users)
-      .set({ name : name })
-      .where(eq(Users.email, user?.email))
-      
+      .set({
+        name: name,
+        updatedAt: new Date()
+      })
+      .where(eq(Users.id, user.id))
+      .returning({
+        id: Users.id,
+        name: Users.name,
+        email: Users.email,
+        isAccountVerified: Users.isAccountVerified,
+        is2fa: Users.is2fa,
+        lastLoginAt: Users.lastLoginAt,
+        createdAt: Users.createdAt,
+        updatedAt: Users.updatedAt
+      });
+
+    if (!updatedUser) {
+      return res.status(400).json({
+        success: false,
+        msg: "Failed to update profile"
+      });
+    }
 
     return res
       .status(200)
-      .json({ success: true, msg: "Name upadated successfully" });
+      .json({
+        success: true,
+        msg: "Profile updated successfully",
+        data: updatedUser
+      });
   } catch (error: any) {
-    console.error("Update name error ", error.message);
+    console.error("Update profile error ", error.message);
     return res.status(500).json({ msg: "Server error", error: error.message });
   }
-};
-
-export const updateProfile = async (req:Request, res:Response)=>{
-  
 }

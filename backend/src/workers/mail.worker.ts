@@ -6,11 +6,15 @@ import {
   sendRegisterAccountVerifyEmail,
   sendPasswordRestEmail,
   sendPasswordRestAlertEmail,
-  sendTwoFactorAuthEmail,
+  sendTwoFactorEnableAlertEmail,
+  sendTwoFactorDisableAlertEmail,
 } from "../services/mail/mail.service.js";
+
+
  
-new Worker('mail-queue',
+const worker = new Worker('mail-queue',
     async (job)=>{
+        console.log("Processing job:", job.name);
         const {name , data} = job;
 
         switch (name){
@@ -22,7 +26,7 @@ new Worker('mail-queue',
                 );
                 break;
 
-            case "REGISTER_VERIFY":
+            case "ACCOUNT_VERIFY":
                 await sendRegisterAccountVerifyEmail(
                     data.name,
                     data.email,
@@ -31,11 +35,15 @@ new Worker('mail-queue',
                 break;
 
             case "PASSWORD_RESET":
+                console.log("Password reset called");
+                
                 await sendPasswordRestEmail(
                     data.name,
                     data.email,
                     data.otp
                 );
+                console.log("Break");
+                
                 break;
 
             case "PASSWORD_RESET_ALERT":
@@ -45,11 +53,17 @@ new Worker('mail-queue',
                 );
                 break;
 
-            case "TWO_FACTOR_AUTH":
-                await sendTwoFactorAuthEmail(
+            case "TWO_FA_ENABLE_ALERT":
+                await sendTwoFactorEnableAlertEmail(
                     data.name,
                     data.email,
-                    data.otp
+                );
+                break;
+
+            case "TWO_FA_DISABLE_ALERT":
+                await sendTwoFactorDisableAlertEmail(
+                    data.name,
+                    data.email,
                 );
                 break;
 
@@ -63,3 +77,11 @@ new Worker('mail-queue',
         concurrency : 5
     }
 )
+
+worker.on("ready", () => {
+  console.log("📬 Mail worker ready");
+});
+
+worker.on("failed", (job, err) => {
+  console.error("❌ Job failed:", job?.name, err);
+});

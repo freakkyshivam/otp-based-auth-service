@@ -5,8 +5,6 @@ import { OTP_TTL,MAX_OTP_ATTEMPTS,getOtpKey } from './otp.constraint.js'
 
 import {SendOtpInput,VerifyOtpInput,VerifyOtpResult} from "./otp.types.js"
 
-const redis = await getRedis();
-
 
 export async function storeOtpInRedis({
     identifier,
@@ -14,6 +12,9 @@ export async function storeOtpInRedis({
     ttl = OTP_TTL
 }:SendOtpInput):Promise<string> {
      
+    const startTime = Date.now();
+     
+    const redis = await getRedis();
     const otp = generateOtp();
     const hashedOtp = hashOtp(otp);
 
@@ -22,12 +23,18 @@ export async function storeOtpInRedis({
         hashedOtp,
         attempts : 0
     };
- 
+  
+    const redisStartTime = Date.now();
+     
     await redis.set(
         key,
         JSON.stringify(otpData),
         {EX: ttl,}
     );
+   
+    const redisEndTime = Date.now();
+    const totalTime = Date.now() - startTime;
+     
     return otp;
 }
 
@@ -36,8 +43,11 @@ export async function verifyOtpFromRedis({
   purpose,
   otp,
 }: VerifyOtpInput): Promise<VerifyOtpResult> {
+   
+  const redis = await getRedis();
   const key = getOtpKey(identifier, purpose);
-
+  
+  
   const raw = await redis.get(key);
 
   if (!raw) {

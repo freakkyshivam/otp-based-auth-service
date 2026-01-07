@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User2, Settings, LogOut, Home } from "lucide-react";
+import { User2 , LogOut, Home } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 import { useNavigate } from 'react-router-dom';
@@ -55,10 +55,7 @@ const NavBarMenuAndAvtar = ({handleLogout}:Props) => {
                   <User2 className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />

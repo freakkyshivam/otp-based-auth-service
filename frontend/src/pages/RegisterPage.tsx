@@ -63,43 +63,61 @@ const otpForm = useForm<verifyOtpFormData>({
 
 
   const onSubmit = async (values: signupFormData) => {
-   
-    const result = await signupApi(values.name, values.email, values.password);
-    
-    if (!result.success){
-      setError(result.msg)
-      return;
-    }
+    setError('');
+    setSuccess('');
+
+    try {
+      const result = await signupApi(values.name, values.email, values.password);
+
+      if (!result.success){
+        setError(result.msg || 'Registration failed');
+        return;
+      }
+
       setEmail(values.email);
-      setSuccess(result.msg)
-      setStep("OTP")
- ;
+      setSuccess(result.msg || 'Registration successful! Please verify your email.');
+      setStep("OTP");
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Something went wrong. Please try again.');
+    }
   }
 
  const verifyOtp = async (values: verifyOtpFormData) => {
-  const result = await verifyRegistrationOtpApi(
-    email,
-    values.otp
-  )
+  setError('');
+  setSuccess('');
+
+  try {
+    const result = await verifyRegistrationOtpApi(email, values.otp);
 
     if (!result.success){
-      setError(result.msg)
+      setError(result.msg || 'OTP verification failed');
       return;
     }
 
-     
-  navigate("/login")
+    setSuccess('Account verified successfully! Redirecting to login...');
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    setError('Something went wrong. Please try again.');
   }
+ }
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center  p-4" id='register'>
+    <section className="min-h-[90vh] flex flex-col items-center justify-center  p-4 ml-auto mr-auto" id='register'>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600 rounded-full mix-blend-lighten filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute top-40 right-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-lighten filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/3 w-72 h-72 bg-pink-600 rounded-full mix-blend-lighten filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
-      </div>
+          <div className="absolute top-20 left-10 w-96 h-96 bg-blue-600 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-600 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-20 left-1/3 w-96 h-96 bg-pink-600 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-lighten filter blur-3xl opacity-15 animate-blob animation-delay-3000"></div>
+        </div>
 
-      <Card className='w-100'>
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+
+      <Card className='w-100 z-50 bg-card/40 backdrop-blur-md'>
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -188,11 +206,10 @@ const otpForm = useForm<verifyOtpFormData>({
             >
               {signupForm.formState.isSubmitting ? "Creating account..." : "Register"}
             </Button>
-        
+
           </div>
           </form>
-          )
-          : (
+          ) : (
             <form onSubmit={otpForm.handleSubmit(verifyOtp)} method="post" className='space-y-4'>
               <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -201,11 +218,8 @@ const otpForm = useForm<verifyOtpFormData>({
                 type="email"
                 value={email}
                 readOnly
-                className={`${signupForm.formState.errors.email ? "border-red-500" : ""} pr-10 focus-visible:ring-green-600`}
-              />
-              {signupForm.formState.errors.email && (
-                <p className="text-red-500 text-sm">{signupForm.formState.errors.email.message}</p>
-              )} 
+                className="pr-10 focus-visible:ring-green-600"
+              /> 
             </div>
 
                  <div className="space-y-2 ">
@@ -220,6 +234,13 @@ const otpForm = useForm<verifyOtpFormData>({
                 <p className="text-red-500 text-sm">{otpForm.formState.errors.otp.message}</p>
               )}
             </div>
+
+            {error && (
+              <Alert variant="destructive" className='border-red-500 text-red-600'>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
             {success && (
               <Alert className="border-green-500 text-green-600">

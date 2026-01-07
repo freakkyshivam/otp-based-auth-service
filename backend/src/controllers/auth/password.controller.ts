@@ -10,6 +10,13 @@ import {
   resetPasswordValidation,
 } from "../../validation/validation.js";
 
+import { z } from "zod";
+
+const verifyResetOtpValidation = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().min(6, "OTP must be at least 6 characters"),
+});
+
 import { findUserByEmail } from "../../services/user/user.service.js";
 
 import {
@@ -55,7 +62,7 @@ export const sendResetOtp = async (req: Request, res: Response) => {
       purpose: "RESET_PASSWORD",
     });
 
-    await enqueueMail("RESET_PASSWORD", {
+    await enqueueMail("PASSWORD_RESET", {
       name: exitingUser.name,
       email,
       otp,
@@ -67,6 +74,49 @@ export const sendResetOtp = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Server error ", error.message);
+    return res.status(500).json({ msg: "Server error", error: error.message });
+  }
+};
+
+export const verifyResetOtp = async (req: Request, res: Response) => {
+  try {
+    const validationResult = await verifyResetOtpValidation.safeParseAsync(
+      req.body
+    );
+
+    if (validationResult.error) {
+      return res.status(400).json({
+        success: false,
+        msg: "Please enter valid details",
+        error: validationResult.error,
+      });
+    }
+
+    const { email, otp } = validationResult.data;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        msg: "Email and OTP are required",
+      });
+    }
+
+    const result = await verifyOtpFromRedis({
+      identifier: email,
+      purpose: "RESET_PASSWORD",
+      otp,
+    });
+
+    if (!result.valid) {
+      return res.status(400).json({ success: false, msg: result.reason });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: "OTP verified successfully",
+    });
+  } catch (error: any) {
+    console.error("Verify reset OTP error ", error.message);
     return res.status(500).json({ msg: "Server error", error: error.message });
   }
 };

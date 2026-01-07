@@ -13,6 +13,8 @@ const allowedOrigin = [
 ]
 
 const app = express();
+app.set("trust proxy", 1);
+
 const PORT = process.env.PORT ?? 3000;
 const server = http.createServer(app)
 
@@ -25,11 +27,11 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-    origin: allowedOrigin,
-    credentials: true,             
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}))
+  origin: allowedOrigin,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(express.json())
 app.use(cookieParser())

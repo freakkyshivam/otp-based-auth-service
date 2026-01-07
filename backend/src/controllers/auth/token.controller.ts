@@ -15,20 +15,33 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 export const refreshToken = async (req: Request, res: Response) => {
   try {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:16',message:'refreshToken entry',data:{hasCookies:!!req.cookies,refreshToken:!!req.cookies?.refreshToken,sid:!!req.cookies?.sid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     console.log("Refresh token routes called");
     
     const { refreshToken: incomingRefreshToken, sid } = req.cookies;
 
     if (!incomingRefreshToken || !sid) {
       console.log("Missing tokens");
-
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:22',message:'Missing tokens in refresh',data:{hasRefreshToken:!!incomingRefreshToken,hasSid:!!sid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       return res.status(401).json({ success: false, msg: "Missing tokens" });
     }
 
+    // #region agent log
+    const verifyStartTime = Date.now();
+    fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:28',message:'Before jwt.verify refreshToken',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     const payload = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET!
     ) as JwtPayload;
+    // #region agent log
+    const verifyEndTime = Date.now();
+    fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:35',message:'After jwt.verify refreshToken',data:{hasPayload:!!payload,verifyTime:verifyEndTime-verifyStartTime},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
 
 
 if(!payload){
@@ -111,7 +124,9 @@ if(!payload){
       );
 
     console.log("Token rotated successfully");
-
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:113',message:'Setting cookies in refreshToken',data:{hasAccessToken:!!newAccessToken,hasRefreshToken:!!newRefreshToken,cookieOptions,nodeEnv:process.env.NODE_ENV,origin:req.headers.origin,host:req.headers.host},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     return res
       .cookie("accessToken", newAccessToken, {
         ...cookieOptions,
@@ -124,6 +139,7 @@ if(!payload){
       .json({
         success: true,
         msg: "Token rotated successfully",
+        accessToken: newAccessToken,
       });
   } catch (error: any) {
     console.error("Refresh token error error:", error.message);

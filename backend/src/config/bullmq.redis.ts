@@ -6,3 +6,5 @@ export const bullRedis = new Redis(
     maxRetriesPerRequest: null, 
   }
 );
+ 
+ 

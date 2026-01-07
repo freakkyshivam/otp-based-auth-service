@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import { bullRedis } from "../config/bullmq.redis.js";
+import { bullRedis} from "../config/bullmq.redis.js";
 
 export const mailQueue = new Queue('mail-queue',{
     connection:bullRedis,
@@ -15,8 +15,12 @@ export const mailQueue = new Queue('mail-queue',{
 })
 
   export const enqueueMail = async (
-        type:   "WELCOME" | "RESET_PASSWORD" | "ACCOUNT_VERIFY" | "TWO_FACTOR_AUTH" | "PASSWORD_RESET_ALERT",
+        type:   "WELCOME" | "PASSWORD_RESET" | "ACCOUNT_VERIFY" | "PASSWORD_RESET_ALERT" | "TWO_FA_ENABLE_ALERT" | "TWO_FA_DISABLE_ALERT",
     payload: Record<string, any>
     )=>{
         await mailQueue.add(type,payload);
     }
+
+  if(await mailQueue.isPaused()) await mailQueue.resume();
+
+

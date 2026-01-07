@@ -1,6 +1,6 @@
 import { useState  } from "react";
 import { Button } from "@/components/ui/button";
-import {  Menu, X, User2, Settings, LogOut, Home } from "lucide-react";
+import {  Menu, X, User2,   LogOut, Home } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
  
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -75,17 +75,7 @@ const NavbarMobileMenu = ({handleLogout}:Props) => {
                       <User2 className="mr-2 h-4 w-4" />
                       Profile
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="justify-start text-gray-300 hover:text-white"
-                      onClick={() => {
-                        navigate('/settings');
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Button>
+                  
                     <Button 
                       variant="ghost" 
                       className="justify-start text-red-600 hover:text-red-500 hover:bg-red-950/20"

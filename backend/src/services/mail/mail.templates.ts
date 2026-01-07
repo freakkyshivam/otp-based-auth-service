@@ -164,56 +164,110 @@ This is an automated message. Please do not reply.`,
   };
 }
 
-export function twoFactorAuthTemplate({
+export function twoFactorEnableAlertTemplate({
   name,
-  otp,
 }: {
   name?: string;
-  otp: string;
 }) {
   return {
-    subject: "🔐 Your Two-Factor Authentication Code",
+    subject: "🛡️ Two-Factor Authentication Enabled",
     text: `Hello ${name ? name : "User"},
 
-Your Two-Factor Authentication (2FA) code is: ${otp}
+Your account's Two-Factor Authentication (2FA) has been successfully enabled.
 
-This code is valid for 5 minutes.
+This adds an extra layer of security to your account. You will now need to provide both your password and a verification code from your authenticator app to sign in.
 
-If you did not try to sign in, please secure your account immediately.
+If you did not enable 2FA, please contact our support team immediately to secure your account.
 
-This is an automated message. Please do not reply.`,
+This is an automated security message. Please do not reply.`,
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color:#2563eb;">Two-Factor Authentication</h2>
+        <h2 style="color:#16a34a;">Two-Factor Authentication Enabled</h2>
 
         <p>Hello ${name ? name : "User"},</p>
 
         <p>
-          To complete your sign-in, please use the verification code below:
+          Your account's <strong>Two-Factor Authentication (2FA)</strong> has been
+          <strong style="color:#16a34a;">successfully enabled</strong>.
+        </p>
+
+        <p>
+          This adds an extra layer of security to your account. You will now need to provide both
+          your password and a verification code from your authenticator app to sign in.
         </p>
 
         <div style="
-          font-size: 28px;
-          font-weight: bold;
-          letter-spacing: 6px;
+          background-color: #f0fdf4;
+          border-left: 4px solid #16a34a;
+          padding: 16px;
           margin: 20px 0;
-          color:#111;
         ">
-          ${otp}
+          <strong>Security Reminder:</strong> Keep your backup codes safe. You'll need them if you lose access to your authenticator app.
         </div>
 
-        <p>
-          This code will expire in <strong>5 minutes</strong>.
-        </p>
-
-        <p style="color:#b91c1c;">
-          If you did not attempt to sign in, please change your password immediately.
+        <p style="color:#dc2626;">
+          If you did <strong>not</strong> enable 2FA, please contact our support team immediately.
         </p>
 
         <hr />
 
         <p style="font-size: 12px; color: #777;">
-          This is an automated security email. Please do not reply.
+          This is an automated security message. Please do not reply.
+        </p>
+      </div>
+    `,
+  };
+}
+
+export function twoFactorDisableAlertTemplate({
+  name,
+}: {
+  name?: string;
+}) {
+  return {
+    subject: "⚠️ Two-Factor Authentication Disabled",
+    text: `Hello ${name ? name : "User"},
+
+Your account's Two-Factor Authentication (2FA) has been disabled.
+
+Your account is now protected by password only. While this makes signing in easier, it reduces your account's security level.
+
+If you did not disable 2FA, please re-enable it immediately and contact our support team.
+
+This is an automated security message. Please do not reply.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2 style="color:#dc2626;">Two-Factor Authentication Disabled</h2>
+
+        <p>Hello ${name ? name : "User"},</p>
+
+        <p>
+          Your account's <strong>Two-Factor Authentication (2FA)</strong> has been
+          <strong style="color:#dc2626;">disabled</strong>.
+        </p>
+
+        <p>
+          Your account is now protected by password only. While this makes signing in easier,
+          it reduces your account's security level.
+        </p>
+
+        <div style="
+          background-color: #fef2f2;
+          border-left: 4px solid #dc2626;
+          padding: 16px;
+          margin: 20px 0;
+        ">
+          <strong>Security Warning:</strong> Consider re-enabling 2FA to maintain the highest level of account security.
+        </div>
+
+        <p style="color:#dc2626;">
+          If you did <strong>not</strong> disable 2FA, please re-enable it immediately and contact our support team.
+        </p>
+
+        <hr />
+
+        <p style="font-size: 12px; color: #777;">
+          This is an automated security message. Please do not reply.
         </p>
       </div>
     `,

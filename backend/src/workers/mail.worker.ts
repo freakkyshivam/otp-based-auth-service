@@ -35,15 +35,11 @@ const worker = new Worker('mail-queue',
                 break;
 
             case "PASSWORD_RESET":
-                console.log("Password reset called");
-                
                 await sendPasswordRestEmail(
                     data.name,
                     data.email,
                     data.otp
                 );
-                console.log("Break");
-                
                 break;
 
             case "PASSWORD_RESET_ALERT":

@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.route.js'
 import cors from 'cors'
 import http from 'node:http'
+import './workers/mail.worker.js'
  
 
 const allowedOrigin = [

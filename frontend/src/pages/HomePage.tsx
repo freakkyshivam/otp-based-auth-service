@@ -128,7 +128,7 @@ const HomePage = () => {
             </span>
           </div>
 
-          <h1 className={`text-6xl md:text-8xl font-black mb-8 transition-all duration-1000 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
+          <h1 className={`text-5xl md:text-8xl font-black mb-8 transition-all duration-1000 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
             <span className="bg-linear-to-r from-white via-blue-100 to-indigo-200 bg-clip-text text-transparent">
               Secure Authentication
             </span>
@@ -255,7 +255,7 @@ const HomePage = () => {
         <div className="bg-linear-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20 backdrop-blur-xl border-2 border-white/10 rounded-3xl p-12 md:p-16 relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
-          <div className="relative grid md:grid-cols-2 gap-12 items-center">
+          <div className="relative grid md:grid-cols-2 gap-12 items-center ">
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-green-600/20 to-emerald-600/20 text-green-300 rounded-full text-sm font-semibold border border-green-500/30 mb-6">
                 <Smartphone className="h-4 w-4" />
@@ -270,7 +270,7 @@ const HomePage = () => {
                 Add an extra layer of security with TOTP-based 2FA. Works seamlessly with Google Authenticator, Microsoft Authenticator, and Authy.
               </p>
 
-              <div className="space-y-4 mb-8">
+              <div className="space-y-4 mb-8 ">
                 <div className="flex items-start gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
                   <QrCode className="h-6 w-6 text-blue-400 shrink-0 mt-1" />
                   <div>

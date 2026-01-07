@@ -144,15 +144,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    const result = await verifyOtpFromRedis({
-      identifier: email,
-      purpose: "RESET_PASSWORD",
-      otp,
-    });
-
-    if (!result.valid) {
-      return res.status(400).json({ success: false, msg: result.reason });
-    }
+    
 
     const exitingUser = await findUserByEmail(email);
 

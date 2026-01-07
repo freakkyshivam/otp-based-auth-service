@@ -43,6 +43,12 @@ app.use('/api/user', userRoutes)
 app.get("/health", (req, res) => {
   res.send("OK");
 });
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Global error:', err);
+  res.status(500).json({ success: false, msg: 'Something went wrong' });
+});
  
 
 server.listen(PORT, () => console.log(`🚀 Server listen at http://localhost:${PORT}`));

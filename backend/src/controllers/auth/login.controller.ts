@@ -157,7 +157,7 @@ export const login = async (req: Request, res: Response) => {
     console.error("Server error ", error.message);
     return res
       .status(500)
-      .json({ success: false, msg: "Something went wrong" });
+      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
   }
 };
 
@@ -317,7 +317,7 @@ const sessionId = crypto.randomUUID();
     console.error("Server error (2FA login error ) ", error.message);
     return res
       .status(500)
-      .json({ success: false, msg: "Something went wrong" });
+      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
   }
 };
 
@@ -364,6 +364,6 @@ export const logout = async (req: Request, res: Response) => {
     console.error(error.message);
     return res
       .status(500)
-      .json({ success: false, msg: "Something went wrong" });
+      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
   }
 };

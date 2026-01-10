@@ -42,7 +42,7 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
-      !originalRequest.url.includes("/auth/v1/auth/token/refresh")
+      !originalRequest.url.includes("/v1/auth/token/refresh")
     ) {
       originalRequest._retry = true;
 
@@ -192,7 +192,7 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Revoke Session API called', { sid, userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.post('/api/v1/auth/sessions/revoke',{sid})
+    const {data} = await api.post('/api/v1/users/sessions/revoke',{sid})
 
     return data;
   } catch (error : unknown) {
@@ -213,7 +213,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Terminate All Other Sessions API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    await api.post('/api/v1/auth/sessions/terminate-others',{},{
+    await api.post('/api/v1/users/sessions/terminate-others',{},{
       withCredentials : true
     })
     
@@ -281,7 +281,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/v1/auth/login/verify2fa',{code,type},{
+    const {data} = await api.post('/api/v1/auth/2fa/verify-login',{code,type},{
       withCredentials : true
     })
 
@@ -305,7 +305,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Disable 2FA API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/v1/auth/mfa/disabled',{password},{
+    const {data} = await api.post('/api/v1/auth/mfa/disable',{password},{
       withCredentials : true
     })
  

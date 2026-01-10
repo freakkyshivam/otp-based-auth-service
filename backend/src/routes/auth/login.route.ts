@@ -15,7 +15,7 @@ const router: RouterType = Router();
 // login
 router.post("/login",deviceInfo, login);
 
-router.post('/login/verify2fa',verifyTemptoken,deviceInfo, verify2faLogin)
+router.post('/2fa/verify-login',verifyTemptoken,deviceInfo, verify2faLogin)
 
 // logout (protected)
 router.post("/logout",   logout);

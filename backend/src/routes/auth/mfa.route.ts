@@ -8,7 +8,7 @@ const router: RouterType = Router();
 
 router.post('/mfa/setup',authMiddleware ,setup2fa);
 router.post('/mfa/verify',authMiddleware,verify2faSetup)
-router.post('/mfa/disabled',authMiddleware,disable2Fa)
+router.post('/mfa/disable',authMiddleware,disable2Fa)
 router.post('/mfa/generate-new-backup-codes',authMiddleware,generateNewBackupCode)
 
 export default router;

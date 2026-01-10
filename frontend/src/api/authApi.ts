@@ -257,13 +257,10 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Verify 2FA Setup API called', { userAgent: navigator.userAgent });
     // #endregion
-    const token = localStorage.getItem("tempToken")
+    
     const {data} = await api.post('/api/v1/auth/mfa/verify',{otp},
       {
-     headers: {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    },
+        withCredentials:true
     },
    
    
@@ -289,9 +286,12 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
     // #endregion
-
+    const token = localStorage.getItem("tempToken")
     const {data} = await api.post('/api/v1/auth/2fa/verify-login',{code,type},{
-      withCredentials : true
+       headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
     })
 
     return data;

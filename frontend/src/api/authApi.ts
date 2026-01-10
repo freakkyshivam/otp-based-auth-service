@@ -289,6 +289,7 @@ export const logoutApi = async ()=>{
     const token = localStorage.getItem("tempToken")
      
     const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/2fa/verify-login`,{code,type},{
+      withCredentials:true,
        headers: {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",

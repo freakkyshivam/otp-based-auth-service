@@ -1,54 +1,12 @@
 import 'dotenv/config'
-import express from 'express'
-import cookieParser from 'cookie-parser';
-import authRoutes from './routes/auth.routes.js'
-import userRoutes from './routes/user.route.js'
-import cors from 'cors'
+ 
 import http from 'node:http'
 import './workers/mail.worker.js'
+ import app from './app.js'
  
-
-const allowedOrigin = [
-    'http://localhost:5173',
-    'https://otpbasedauth.vercel.app'
-]
-
-const app = express();
-app.set("trust proxy", 1);
-
+ 
 const PORT = process.env.PORT ?? 3000;
 const server = http.createServer(app)
 
- 
-app.use((req, res, next) => {
-  console.log(
-    `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
-  );
-  next();
-});
-
-app.use(cors({
-  origin: allowedOrigin,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
-
-app.use(express.json())
-app.use(cookieParser())
-
-app.use("/api/auth", authRoutes);
-app.use('/api/user', userRoutes)
- 
-app.get("/health", (req, res) => {
-  res.send("OK");
-});
-
-// Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Global error:', err);
-  res.status(500).json({ success: false, msg: 'Something went wrong' });
-});
- 
 
 server.listen(PORT, () => console.log(`🚀 Server listen at http://localhost:${PORT}`));

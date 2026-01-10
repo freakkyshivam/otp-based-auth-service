@@ -120,7 +120,7 @@ const HomePage = () => {
   {/* Grid Pattern Overlay */}
   <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-size-[2rem_2rem] sm:bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
 
-        <div className="relative max-w-7xl mx-auto flex flex-col items-center justify-center text-center py-24 md:py-40 px-6">
+        <div className="relative max-w-7xl mx-auto flex flex-col items-center justify-center text-center py-20 md:py-40 px-6">
           <div className={`inline-block mb-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
             <span className="px-4 py-2 bg-linear-to-r from-blue-600/20 to-purple-600/20 text-blue-300 rounded-full text-sm font-semibold border border-blue-500/30 inline-flex items-center gap-2 backdrop-blur-sm">
               <Sparkles className="h-4 w-4 animate-pulse" />
@@ -139,8 +139,8 @@ const HomePage = () => {
           </h1>
 
           <p className={`text-xl md:text-2xl text-gray-300 max-w-4xl mb-12 leading-relaxed transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
-            Enterprise-grade OTP authentication with <span className="text-blue-400 font-semibold">Redis</span>, <span className="text-purple-400 font-semibold">JWT</span>, and <span className="text-green-400 font-semibold">Authenticator App 2FA</span>.
-            Build trust with your users through military-grade security.
+            Enterprise-grade <span className='text-indigo-500 font-semibold'>MITM-Resistant Secure Authentication Platform</span> using <span className="text-blue-400 font-semibold">Redis</span>, <span className="text-purple-400 font-semibold">JWT</span>, and <span className="text-green-400 font-semibold">Authenticator-based 2FA</span>.
+            Designed to mitigate common threats including <span className='font-semibold'>Man-in-the-Middle (MITM)</span> attacks using <span className='font-semibold'>HTTPS</span>, <span className='font-semibold'>HSTS</span>, and <span className='font-semibold'>secure cookies</span>.
           </p>
 
           <div className={`flex flex-wrap gap-4 justify-center mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>

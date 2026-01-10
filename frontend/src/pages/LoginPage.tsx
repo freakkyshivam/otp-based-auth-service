@@ -57,8 +57,8 @@ export default function LoginForm() {
     try {
       const data = await loginApi(d.email, d.password);
 
-      if (!data.success) {
-        setError(data.msg);
+      if (!data?.success) {
+        setError(data?.msg);
         return;
       }
 

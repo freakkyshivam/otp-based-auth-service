@@ -2,7 +2,7 @@ import { CookieOptions } from "express";
 export const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   path: "/",
   // Remove hardcoded domain - let browser set it automatically
   // domain: "otp-based-auth-system.onrender.com",

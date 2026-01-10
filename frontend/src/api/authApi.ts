@@ -96,6 +96,7 @@ export const loginApi = async (email:string, password:string):Promise<LoginRespo
           setCookieHeaders: headers['set-cookie'] || 'none'
         });
         // #endregion
+         localStorage.setItem('tempToken', data.tempToken)
         
         return data;
       } catch (error : unknown) {
@@ -256,10 +257,18 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Verify 2FA Setup API called', { userAgent: navigator.userAgent });
     // #endregion
-
-    const {data} = await api.post('/api/v1/auth/mfa/verify',{otp},{
-      withCredentials : true
-    })
+    const token = localStorage.getItem("tempToken")
+    const {data} = await api.post('/api/v1/auth/mfa/verify',{otp},
+      {
+     headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    },
+   
+   
+    
+  )
 
     return data;
     

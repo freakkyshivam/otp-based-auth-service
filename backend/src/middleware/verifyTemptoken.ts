@@ -9,7 +9,13 @@ export const verifyTemptoken = (
   next: NextFunction
 ) => {
   try {
-    const tempToken = req.cookies?.tempToken;
+   const authHeader = req.headers.authorization;
+
+if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  return res.status(401).json({ message: "Temp token missing" });
+}
+
+const tempToken = authHeader.split(" ")[1];
 
     if (!tempToken) {
       return res

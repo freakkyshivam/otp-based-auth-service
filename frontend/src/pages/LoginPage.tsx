@@ -96,6 +96,7 @@ export default function LoginForm() {
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem('accessToken',data.accessToken)
+      localStorage.removeItem('tempToken')
       navigate("/dashboard");
      
     } catch (error) {

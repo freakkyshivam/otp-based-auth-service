@@ -76,14 +76,11 @@ export const login = async (req: Request, res: Response) => {
       );
       return res
         .status(200)
-        .cookie("tempToken", tempToken, {
-          ...cookieOptions,
-          maxAge: 5 * 60 * 60,
-        })
         .json({
           success: true,
           msg: "Enter OTP from authenticator app",
           twoFactorEnabled: true,
+          tempToken
         });
     }
 

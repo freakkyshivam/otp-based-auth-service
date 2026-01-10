@@ -9,19 +9,20 @@ export const verifyTemptoken = (
   next: NextFunction
 ) => {
   try {
-   const authHeader = req.headers.authorization;
+   const authHeader = req.headers?.authorization;
 
 if (!authHeader || !authHeader.startsWith("Bearer ")) {
   return res.status(401).json({ message: "Temp token missing" });
 }
 
 const tempToken = authHeader.split(" ")[1];
-
+console.log(tempToken);
     if (!tempToken) {
       return res
         .status(401)
         .json({ success: false, msg: "Temp token missing" });
     }
+
 
     const decoded = jwt.verify(
       tempToken,

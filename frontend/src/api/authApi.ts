@@ -287,7 +287,8 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
     // #endregion
     const token = localStorage.getItem("tempToken")
-    const {data} = await api.post('/api/v1/auth/2fa/verify-login',{code,type},{
+     
+    const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/2fa/verify-login`,{code,type},{
        headers: {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",

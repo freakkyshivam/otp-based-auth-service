@@ -23,6 +23,9 @@ import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[LOGIN] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     console.time("Start")
     const validationResult = await loginValidation.safeParseAsync(req.body);
 
@@ -163,6 +166,9 @@ export const login = async (req: Request, res: Response) => {
 
 export const verify2faLogin = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[VERIFY 2FA LOGIN] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const { code, type } = req.body;
 
     const user = req.user;
@@ -323,6 +329,9 @@ const sessionId = crypto.randomUUID();
 
 export const logout = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[LOGOUT] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const { refreshToken, sid } = req.cookies || req.body;
 
     if (refreshToken && sid) {

@@ -83,7 +83,7 @@ api.interceptors.response.use(
 export const loginApi = async (email:string, password:string):Promise<LoginResponse>=>{
       try {
         // #region agent log
-        console.log('[DEBUG] Login API called', { email, hasCredentials: true });
+        console.log('[DEBUG] Login API called', { email, hasCredentials: true, userAgent: navigator.userAgent });
         // #endregion
         const {data, headers} = await api.post(`/api/auth/login`,{
           email ,
@@ -118,6 +118,9 @@ export const signupApi = async (
   password: string
 ):Promise<APIResponse<signupResponse>> => {
   try {
+    // #region region agent log
+    console.log('[DEBUG] Signup API called', { email, userAgent: navigator.userAgent });
+    // #endregion
     const { data } = await api.post(`/api/auth/register`,
       { name, email, password }
     );
@@ -141,6 +144,9 @@ export const verifyRegistrationOtpApi = async(
   otp : string,
 ):Promise<APIResponse<signupResponse>>=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Verify Registration OTP API called', { email, userAgent: navigator.userAgent });
+    // #endregion
 
    const { data } = await api.post(
       `/api/auth/verify-register-otp`,
@@ -163,6 +169,9 @@ export const verifyRegistrationOtpApi = async(
 
 export const logoutApi = async ()=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Logout API called', { userAgent: navigator.userAgent });
+    // #endregion
     const {data} = await api.post('/api/auth/logout',{})
 
     return data;
@@ -180,6 +189,9 @@ export const logoutApi = async ()=>{
 
  export const revokeSessionApi = async (sid : string)=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Revoke Session API called', { sid, userAgent: navigator.userAgent });
+    // #endregion
     const {data} = await api.post('/api/auth/sessions/revoke',{sid})
 
     return data;
@@ -197,6 +209,9 @@ export const logoutApi = async ()=>{
 
  export const terminateAllOtherSessionsApi = async()=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Terminate All Other Sessions API called', { userAgent: navigator.userAgent });
+    // #endregion
 
     await api.post('/api/auth/sessions/terminate-others',{},{
       withCredentials : true
@@ -216,6 +231,9 @@ export const logoutApi = async ()=>{
 
  export const twoFASetupApi = async()=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] 2FA Setup API called', { userAgent: navigator.userAgent });
+    // #endregion
 
    const {data} = await api.post('/api/auth/mfa/setup',{},{
       withCredentials : true
@@ -235,6 +253,9 @@ export const logoutApi = async ()=>{
 
   export const verifyFASetupApi = async(otp:string)=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Verify 2FA Setup API called', { userAgent: navigator.userAgent });
+    // #endregion
 
     const {data} = await api.post('/api/auth/mfa/verify',{otp},{
       withCredentials : true
@@ -256,6 +277,9 @@ export const logoutApi = async ()=>{
 
   export const verify2FALoginApi = async(code:string, type:string):Promise<LoginResponse>=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
+    // #endregion
 
     const {data} = await api.post('/api/auth/login/verify2fa',{code,type},{
       withCredentials : true
@@ -277,6 +301,9 @@ export const logoutApi = async ()=>{
 
   export const disable2Fa = async(password:string):Promise<NormalApiResponse>=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Disable 2FA API called', { userAgent: navigator.userAgent });
+    // #endregion
 
     const {data} = await api.post('/api/auth/mfa/disabled',{password},{
       withCredentials : true
@@ -299,6 +326,9 @@ export const logoutApi = async ()=>{
 
  export const generateNewBackupCodeApi =  async(password:string):Promise<NormalApiResponse>=>{
   try {
+    // #region region agent log
+    console.log('[DEBUG] Generate New Backup Code API called', { userAgent: navigator.userAgent });
+    // #endregion
 
     const {data} = await api.post('/api/auth/mfa/generate-new-backup-codes',{password},{
       withCredentials : true
@@ -321,6 +351,9 @@ export const logoutApi = async ()=>{
 
  export const sendPasswordResetOtpApi = async (email: string): Promise<NormalApiResponse> => {
   try {
+    // #region region agent log
+    console.log('[DEBUG] Send Password Reset OTP API called', { email, userAgent: navigator.userAgent });
+    // #endregion
     const { data } = await api.post('/api/auth/password/reset-otp', { email });
 
     return data;
@@ -338,6 +371,9 @@ export const logoutApi = async ()=>{
 
 export const verifyResetOtpApi = async (email: string, otp: string): Promise<NormalApiResponse> => {
   try {
+    // #region region agent log
+    console.log('[DEBUG] Verify Reset OTP API called', { email, userAgent: navigator.userAgent });
+    // #endregion
     const { data } = await api.post('/api/auth/password/verify-otp', { email, otp });
 
     return data;
@@ -355,6 +391,9 @@ export const verifyResetOtpApi = async (email: string, otp: string): Promise<Nor
 
 export const resetPasswordApi = async (email: string, otp: string, newPassword: string): Promise<NormalApiResponse> => {
   try {
+    // #region region agent log
+    console.log('[DEBUG] Reset Password API called', { email, userAgent: navigator.userAgent });
+    // #endregion
     const { data } = await api.post('/api/auth/password/reset', { email, otp, newPassword });
 
     return data;

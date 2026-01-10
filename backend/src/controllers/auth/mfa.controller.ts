@@ -16,6 +16,9 @@ const redis = await getRedis();
 
 export const setup2fa = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[SETUP 2FA] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const user = req.user;
     if (!user?.id) {
       return res.status(401).json({ success: false, msg: "Unauthorized" });
@@ -58,6 +61,9 @@ export const setup2fa = async (req: Request, res: Response) => {
 
 export const verify2faSetup = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[VERIFY 2FA SETUP] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const { otp } = req.body;
     const user = req.user;
 
@@ -145,6 +151,9 @@ export const verify2faSetup = async (req: Request, res: Response) => {
 
 export const disable2Fa = async (req:Request, res:Response)=>{
   try {
+    // #region region agent log
+    console.log(`[DISABLE 2FA] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
 
     const authUser = req.user;
 
@@ -229,6 +238,9 @@ export const disable2Fa = async (req:Request, res:Response)=>{
 
 export const generateNewBackupCode = async (req:Request, res:Response)=>{
   try {
+    // #region region agent log
+    console.log(`[GENERATE NEW BACKUP CODE] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
 
     const authUser = req.user;
 

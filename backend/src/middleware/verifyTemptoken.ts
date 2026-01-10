@@ -3,7 +3,7 @@ import jwt,{JwtPayload} from 'jsonwebtoken'
 export interface AuthRequest extends Request {
   user?: JwtPayload;
 }
-export const verifyTempToken = (
+export const verifyTemptoken = (
   req: AuthRequest,
   res: Response,
   next: NextFunction

@@ -18,7 +18,9 @@ app.set("trust proxy", 1);
 
 // logging FIRST
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  // #region region agent log
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} - IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+  // #endregion
   next();
 });
 

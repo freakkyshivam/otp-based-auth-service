@@ -28,6 +28,9 @@ import { enqueueMail } from "../../queues/mail.queue.js";
 
 export const sendResetOtp = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[SEND RESET OTP] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const validationResult = await sendResetOtpValidation.safeParseAsync(
       req.body
     );
@@ -80,6 +83,9 @@ export const sendResetOtp = async (req: Request, res: Response) => {
 
 export const verifyResetOtp = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[VERIFY RESET OTP] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const validationResult = await verifyResetOtpValidation.safeParseAsync(
       req.body
     );
@@ -123,6 +129,9 @@ export const verifyResetOtp = async (req: Request, res: Response) => {
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[RESET PASSWORD] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const validationResult = await resetPasswordValidation.safeParseAsync(
       req.body
     );

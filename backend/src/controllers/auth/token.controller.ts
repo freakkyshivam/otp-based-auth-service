@@ -15,6 +15,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 export const refreshToken = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[REFRESH TOKEN] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/1418b0b3-e616-4466-997e-06f62e8307db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'token.controller.ts:16',message:'refreshToken entry',data:{hasCookies:!!req.cookies,refreshToken:!!req.cookies?.refreshToken,sid:!!req.cookies?.sid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion

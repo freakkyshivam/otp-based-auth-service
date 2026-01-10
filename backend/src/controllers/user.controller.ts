@@ -10,6 +10,9 @@ import { changePasswordValiadtion,updateNameValidation } from "../validation/val
 
 export const UserInfo = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[USER INFO] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const user = req.user;
 
     if (!user?.id) {
@@ -96,6 +99,9 @@ export const UserInfo = async (req: Request, res: Response) => {
 
 export const allSessions = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[ALL SESSIONS] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const user = req.user;
 
     if (!user?.id) {
@@ -147,6 +153,9 @@ export const allSessions = async (req: Request, res: Response) => {
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[CHANGE PASSWORD] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const user = req.user;
 
     if (!user) {
@@ -218,6 +227,9 @@ export const changePassword = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req:Request, res:Response)=>{
   try {
+    // #region region agent log
+    console.log(`[UPDATE PROFILE] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const user = req.user;
 
     if (!user) {

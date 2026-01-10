@@ -28,6 +28,9 @@ import { enqueueMail } from "../../queues/mail.queue.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[REGISTER] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const validationResult = await signupValidation.safeParseAsync(req.body);
 
     if (validationResult.error) {
@@ -95,6 +98,9 @@ export const register = async (req: Request, res: Response) => {
 
 export const verifyRegisterOtp = async (req: Request, res: Response) => {
   try {
+    // #region region agent log
+    console.log(`[VERIFY REGISTER OTP] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    // #endregion
     const validationResult = otpVerificationForRegister.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ success: false });

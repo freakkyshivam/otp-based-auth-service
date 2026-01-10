@@ -12,7 +12,7 @@ export const UserInfoApi = async ():Promise<APIResponse<UserInfoData>>=>{
     // #region region agent log
     console.log('[DEBUG] UserInfo API called', { userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.get('/api/user/me')
+    const {data} = await api.get('/api/v1/users/me')
     return data;
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
@@ -35,7 +35,7 @@ export const allSessions = async (): Promise<APIResponse<SessionsResponse>> => {
     console.log('[DEBUG] All Sessions API called', { userAgent: navigator.userAgent });
     // #endregion
     const { data } = await api.get<APIResponse<SessionsResponse>>(
-      "/api/user/sessions",
+      "/api/v1/users/sessions",
       { withCredentials: true }
     );
  
@@ -60,7 +60,7 @@ export const updatePasswordApi = async (password:string, newPassword:string) => 
     console.log('[DEBUG] Update Password API called', { userAgent: navigator.userAgent });
     // #endregion
     const { data } = await api.post(
-      "/api/user/update-password",
+      "/api/v1/users/update-password",
       {password,newPassword},
       { withCredentials: true }
     );
@@ -86,7 +86,7 @@ export const updateProfileApi = async (name: string) => {
     console.log('[DEBUG] Update Profile API called', { name, userAgent: navigator.userAgent });
     // #endregion
     const { data } = await api.put(
-      "/api/user/update-profile",
+      "/api/v1/users/update-profile",
       { name },
       { withCredentials: true }
     );

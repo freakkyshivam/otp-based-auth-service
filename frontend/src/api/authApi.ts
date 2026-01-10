@@ -42,7 +42,7 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
-      !originalRequest.url.includes("/auth/token/refresh")
+      !originalRequest.url.includes("/auth/v1/auth/token/refresh")
     ) {
       originalRequest._retry = true;
 
@@ -51,7 +51,7 @@ api.interceptors.response.use(
         console.log('[DEBUG] Refreshing token', { url: originalRequest.url });
         // #endregion
         const res = await api.post(
-          "/api/auth/token/refresh",
+          "/api/v1/auth/token/refresh",
           {},
           { withCredentials: true }
         );
@@ -85,7 +85,7 @@ export const loginApi = async (email:string, password:string):Promise<LoginRespo
         // #region agent log
         console.log('[DEBUG] Login API called', { email, hasCredentials: true, userAgent: navigator.userAgent });
         // #endregion
-        const {data, headers} = await api.post(`/api/auth/login`,{
+        const {data, headers} = await api.post(`/api/v1/auth/login`,{
           email ,
           password
         },{withCredentials:true} )
@@ -121,7 +121,7 @@ export const signupApi = async (
     // #region region agent log
     console.log('[DEBUG] Signup API called', { email, userAgent: navigator.userAgent });
     // #endregion
-    const { data } = await api.post(`/api/auth/register`,
+    const { data } = await api.post(`/api/v1/auth/register`,
       { name, email, password }
     );
 
@@ -149,7 +149,7 @@ export const verifyRegistrationOtpApi = async(
     // #endregion
 
    const { data } = await api.post(
-      `/api/auth/verify-register-otp`,
+      `/api/v1/auth/verify-register-otp`,
       {email,otp },
        
     );
@@ -172,7 +172,7 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Logout API called', { userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.post('/api/auth/logout',{})
+    const {data} = await api.post('/api/v1/auth/logout',{})
 
     return data;
   } catch (error : unknown) {
@@ -192,7 +192,7 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Revoke Session API called', { sid, userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.post('/api/auth/sessions/revoke',{sid})
+    const {data} = await api.post('/api/v1/auth/sessions/revoke',{sid})
 
     return data;
   } catch (error : unknown) {
@@ -213,7 +213,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Terminate All Other Sessions API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    await api.post('/api/auth/sessions/terminate-others',{},{
+    await api.post('/api/v1/auth/sessions/terminate-others',{},{
       withCredentials : true
     })
     
@@ -235,7 +235,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] 2FA Setup API called', { userAgent: navigator.userAgent });
     // #endregion
 
-   const {data} = await api.post('/api/auth/mfa/setup',{},{
+   const {data} = await api.post('/api/v1/auth/mfa/setup',{},{
       withCredentials : true
     })
     return data;
@@ -257,7 +257,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Verify 2FA Setup API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/auth/mfa/verify',{otp},{
+    const {data} = await api.post('/api/v1/auth/mfa/verify',{otp},{
       withCredentials : true
     })
 
@@ -281,7 +281,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/auth/login/verify2fa',{code,type},{
+    const {data} = await api.post('/api/v1/auth/login/verify2fa',{code,type},{
       withCredentials : true
     })
 
@@ -305,7 +305,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Disable 2FA API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/auth/mfa/disabled',{password},{
+    const {data} = await api.post('/api/v1/auth/mfa/disabled',{password},{
       withCredentials : true
     })
  
@@ -330,7 +330,7 @@ export const logoutApi = async ()=>{
     console.log('[DEBUG] Generate New Backup Code API called', { userAgent: navigator.userAgent });
     // #endregion
 
-    const {data} = await api.post('/api/auth/mfa/generate-new-backup-codes',{password},{
+    const {data} = await api.post('/api/v1/auth/mfa/generate-new-backup-codes',{password},{
       withCredentials : true
     })
 
@@ -354,7 +354,7 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Send Password Reset OTP API called', { email, userAgent: navigator.userAgent });
     // #endregion
-    const { data } = await api.post('/api/auth/password/reset-otp', { email });
+    const { data } = await api.post('/api/v1/auth/password/reset-otp', { email });
 
     return data;
   } catch (error: unknown) {
@@ -374,7 +374,7 @@ export const verifyResetOtpApi = async (email: string, otp: string): Promise<Nor
     // #region region agent log
     console.log('[DEBUG] Verify Reset OTP API called', { email, userAgent: navigator.userAgent });
     // #endregion
-    const { data } = await api.post('/api/auth/password/verify-otp', { email, otp });
+    const { data } = await api.post('/api/v1/auth/password/verify-otp', { email, otp });
 
     return data;
   } catch (error: unknown) {
@@ -394,7 +394,7 @@ export const resetPasswordApi = async (email: string, otp: string, newPassword: 
     // #region region agent log
     console.log('[DEBUG] Reset Password API called', { email, userAgent: navigator.userAgent });
     // #endregion
-    const { data } = await api.post('/api/auth/password/reset', { email, otp, newPassword });
+    const { data } = await api.post('/api/v1/auth/password/reset', { email, otp, newPassword });
 
     return data;
   } catch (error: unknown) {

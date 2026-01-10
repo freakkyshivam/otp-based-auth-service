@@ -19,7 +19,9 @@ app.set("trust proxy", 1);
 // logging FIRST
 app.use((req, res, next) => {
   // #region region agent log
+  if(process.env.NODE_ENV !== "production"){
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} - IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+  }
   // #endregion
   next();
 });
@@ -40,7 +42,7 @@ app.use((req, res, next) => {
     return next();
   }
 
-  return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+  return res.redirect(308, `https://${req.headers.host}${req.originalUrl}`);
 });
 
 // enable hsts
@@ -57,7 +59,7 @@ app.use(cors({
   origin: allowedOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
  
@@ -68,10 +70,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
 // routes
-app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 
-app.get("/health", (_, res) => res.send("OK"));
+app.get("/api/v1/health", (_, res) => res.send("OK"));
 
 // global error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

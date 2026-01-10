@@ -133,7 +133,7 @@ export const login = async (req: Request, res: Response) => {
       })
       .cookie("accessToken", accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 5 * 60 * 1000,
       })
 
       .cookie("sid", sessionId, {
@@ -296,7 +296,7 @@ const sessionId = crypto.randomUUID();
       })
       .cookie("accessToken", accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 5 * 60 * 1000,
       })
 
       .cookie("sid", sessionId, {

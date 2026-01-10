@@ -8,7 +8,7 @@ export const generateAccessToken = async (id:string, email: string,is2fa:boolean
         is2fa,
         sid
     }
-    const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,{expiresIn:"15m"})
+    const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!,{expiresIn:"5m"})
     return token;
    } catch (error:any) {
     console.error(error.message)

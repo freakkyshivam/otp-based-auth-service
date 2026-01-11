@@ -6,7 +6,9 @@ Implements OTP-based login, session management, refresh token rotation, and devi
 > This is not a toy project. The focus is on **real-world auth problems** like OTP abuse, session hijacking, and multi-device control.
 
 ---
+## First request may be slow due to free-tier cold start.”
 
+---
 ## 🚀 Live Demo
 - **Frontend (Vercel):** <https://otpbasedauth.vercel.app/>
 - **Backend API (Render):** <https://otp-based-auth-system.onrender.com>

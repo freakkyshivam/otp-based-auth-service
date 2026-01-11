@@ -88,8 +88,8 @@ export default function LoginForm() {
       }
       const data = await verify2FALoginApi(code, verificationType) 
 
-      if (!data.success) {
-        setError(data.msg);
+      if (!data?.success) {
+        setError(data?.msg);
         return;
       }
       setSuccess(`Welcome back ${data.user.name}`);

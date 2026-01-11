@@ -1,5 +1,5 @@
 import { response, type Request, type Response } from "express";
-import argon2 from "argon2";
+ import crypto from 'node:crypto'
 import { and, eq, ne } from "drizzle-orm";
 
 import db from "../../db/db.js";
@@ -8,9 +8,7 @@ import { UserSessions } from "../../db/schema/user_sessions.schema.js";
 
 export const terminateAllOtherDevice = async (req: Request, res: Response) => {
   try {
-    // #region region agent log
-    console.log(`[TERMINATE ALL OTHER DEVICES] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
-    // #endregion
+  
     const user = req.user;
 
     if (!user?.id) {
@@ -42,10 +40,9 @@ export const terminateAllOtherDevice = async (req: Request, res: Response) => {
         });
       }
 
-      const isValid = await argon2.verify(
-        activeSession.refreshToken,
-        refreshToken
-      );
+      const isValid = crypto.createHash("sha256")
+  .update(refreshToken)
+  .digest("hex");
 
       if (isValid) {
         await db
@@ -79,9 +76,7 @@ export const terminateAllOtherDevice = async (req: Request, res: Response) => {
 
 export const revokeSession = async (req: Request, res: Response) => {
   try {
-    // #region region agent log
-    console.log(`[REVOKE SESSION] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
-    // #endregion
+     
     const user = req.user;
 
     if (!user?.id) {

@@ -6,7 +6,8 @@ import userRoutes from './routes/user.route.js'
 import cors from 'cors'
 import type { Express } from 'express';
 import helmet from 'helmet';
-
+import db from './db/db.js'
+import {sql} from 'drizzle-orm'
 const allowedOrigin = [
     'http://localhost:5173',
     'https://otpbasedauth.vercel.app'
@@ -73,7 +74,12 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 
-app.get("/api/v1/health", (_, res) => res.send("OK"));
+app.get("/api/v1/health", async (_req, res) => {
+  await db.execute(sql`SELECT 1`);
+  res.status(200).send("OK");
+});
+
+
 
 // global error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -9,12 +9,17 @@ import SecurityOverview from '@/components/dashboard/Overview';
 import TwoFactorSetup from '@/components/dashboard/TwoFactorSetup';
 import LogoutSessionsComponent from '@/components/dashboard/LogoutSessionsComponent';
 import {ChangePasswordComponent} from '@/components/dashboard/ChangePasswordComponents';
- 
- 
+import { useAuth } from '@/auth/useAuth';
+import { getLocalUser } from '@/utils/getLocalUser';
+ import { useNavigate } from 'react-router-dom';
 
 const UserDashboard = () => {
   const [activeItem, setActiveItem] = useState<string>('Overview');
-  
+  const user = useAuth() || getLocalUser();
+  const navigate = useNavigate();
+  if(!user){
+    return navigate('/login')
+  }
 
   return (
     <div className="min-h-screen ">

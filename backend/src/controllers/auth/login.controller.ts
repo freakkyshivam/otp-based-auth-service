@@ -1,6 +1,6 @@
 import { response, type Request, type Response } from "express";
 import argon2 from "argon2";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 
 import db from "../../db/db.js";
 import Users from "../../db/schema/users.schema.js";
@@ -23,10 +23,6 @@ import backupCodesTable from "../../db/schema/user_2fa_backupcode.scema.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
-    // #region region agent log
-    console.log(`[LOGIN] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
-    // #endregion
-    console.time("Start")
     const validationResult = await loginValidation.safeParseAsync(req.body);
 
     if (validationResult.error) {
@@ -47,7 +43,6 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const existingUser = await findUserByEmail(email);
-
     if (!existingUser) {
       return res.status(400).json({
         success: false,
@@ -74,17 +69,15 @@ export const login = async (req: Request, res: Response) => {
           expiresIn: "5m",
         }
       );
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Enter OTP from authenticator app",
-          twoFactorEnabled: true,
-          tempToken
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Enter OTP from authenticator app",
+        twoFactorEnabled: true,
+        tempToken,
+      });
     }
 
-     const sessionId = crypto.randomUUID();
+    const sessionId = crypto.randomUUID();
 
     const accessToken = await generateAccessToken(
       existingUser.id,
@@ -92,38 +85,19 @@ export const login = async (req: Request, res: Response) => {
       existingUser.is2fa,
       sessionId
     );
+
     const refreshToken = await generateRefreshToken(
       existingUser.id,
       existingUser.email,
       existingUser.is2fa
     );
 
-    await db
-      .update(Users)
-      .set({
-        lastLoginAt: new Date(),
-      })
-      .where(eq(Users.email, email));
+    const hashedRefreshToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
 
-    const hashedRefreshToken = await argon2.hash(refreshToken as string);
-   
-    const device = req.deviceInfo;
- 
-    await db.insert(UserSessions).values({
-      id: sessionId,
-      userId: existingUser.id,
-      refreshToken: hashedRefreshToken,
-      isActive: true,
-
-      deviceName: req.deviceInfo?.deviceName ?? null,
-      deviceType: req.deviceInfo?.deviceType ?? null,
-      os: req.deviceInfo?.os ?? null,
-      browser: req.deviceInfo?.browser ?? null,
-      ipAddress: req.deviceInfo?.ipAddress ?? null,
-    });
-   
-    console.timeEnd('Start')
-    return res
+    res
       .cookie("refreshToken", refreshToken, {
         ...cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -146,26 +120,50 @@ export const login = async (req: Request, res: Response) => {
           name: existingUser.name,
           email: existingUser.email,
           isAccountVerified: existingUser.isAccountVerified,
-          isTwoFactorEnabled : existingUser.is2fa,
-          lastLoginAt : existingUser.lastLoginAt,
-          createdAt : existingUser.createdAt,
-          updatedAt : existingUser.updatedAt
+          isTwoFactorEnabled: existingUser.is2fa,
         },
-        accessToken
+        accessToken,
       });
+
+    queueMicrotask(async () => {
+      const device = req.deviceInfo;
+
+      await db.insert(UserSessions).values({
+        id: sessionId,
+        userId: existingUser.id,
+        refreshToken: hashedRefreshToken,
+        isActive: true,
+
+        deviceName: req.deviceInfo?.deviceName ?? null,
+        deviceType: req.deviceInfo?.deviceType ?? null,
+        os: req.deviceInfo?.os ?? null,
+        browser: req.deviceInfo?.browser ?? null,
+        ipAddress: req.deviceInfo?.ipAddress ?? null,
+      });
+
+      await db
+        .update(Users)
+        .set({
+          lastLoginAt: new Date(),
+        })
+        .where(eq(Users.email, email));
+    });
   } catch (error: any) {
     console.error("Server error ", error.message);
     return res
       .status(500)
-      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
+      .json({
+        success: false,
+        msg:
+          process.env.NODE_ENV === "production"
+            ? "Something went wrong"
+            : error.message,
+      });
   }
 };
 
 export const verify2faLogin = async (req: Request, res: Response) => {
   try {
-    // #region region agent log
-    console.log(`[VERIFY 2FA LOGIN] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
-    // #endregion
     const { code, type } = req.body;
 
     const user = req.user;
@@ -194,58 +192,55 @@ export const verify2faLogin = async (req: Request, res: Response) => {
       });
     }
 
-   
     if (type === "OTP") {
       const isValid = authenticator.verify({
         token: code,
         secret,
       });
-      if(!isValid){
-      return res.status(400).json({
-        success: false,
-        msg: "Wrong OTP",
-      });
-    }
+      if (!isValid) {
+        return res.status(400).json({
+          success: false,
+          msg: "Wrong OTP",
+        });
+      }
     } else {
       let isValid = false;
       const backupCodes = await db
-    .select({ hashCode: backupCodesTable.hashCode })
-    .from(backupCodesTable)
-    .where(
-      and(
-        eq(backupCodesTable.userId, user.id),
-        eq(backupCodesTable.used, false)
-      )
-    );
-
-      for (const bc of backupCodes) {
-        if (await argon2.verify(bc.hashCode, code)) {
-       
-    const result = await db
-        .update(backupCodesTable)
-        .set({ used: true, usedAt: new Date() })
+        .select({ hashCode: backupCodesTable.hashCode })
+        .from(backupCodesTable)
         .where(
           and(
-            eq(backupCodesTable.hashCode, bc.hashCode),
+            eq(backupCodesTable.userId, user.id),
             eq(backupCodesTable.used, false)
           )
         );
 
-         isValid = true;
+      for (const bc of backupCodes) {
+        if (await argon2.verify(bc.hashCode, code)) {
+          const result = await db
+            .update(backupCodesTable)
+            .set({ used: true, usedAt: new Date() })
+            .where(
+              and(
+                eq(backupCodesTable.hashCode, bc.hashCode),
+                eq(backupCodesTable.used, false)
+              )
+            );
 
-      break;
-    }
+          isValid = true;
+
+          break;
+        }
       }
       if (!isValid) {
-       return res.status(400).json({
-        success: false,
-        msg: "Wrong backup code or already used",
-      });
-    }
+        return res.status(400).json({
+          success: false,
+          msg: "Wrong backup code or already used",
+        });
+      }
     }
 
-    
-const sessionId = crypto.randomUUID();
+    const sessionId = crypto.randomUUID();
     const accessToken = await generateAccessToken(
       existingUser.id,
       existingUser.email,
@@ -258,35 +253,14 @@ const sessionId = crypto.randomUUID();
       existingUser.is2fa
     );
 
-    await db
-      .update(Users)
-      .set({
-        lastLoginAt: new Date(),
-      })
-      .where(eq(Users.email, user.email));
-
-    const hashedRefreshToken = await argon2.hash(refreshToken as string);
-    
-    const device = req.deviceInfo;
-
- 
-  
-    await db.insert(UserSessions).values({
-      id: sessionId,
-      userId: existingUser.id,
-      refreshToken: hashedRefreshToken,
-      isActive: true,
-
-      deviceName: req.deviceInfo?.deviceName ?? null,
-      deviceType: req.deviceInfo?.deviceType ?? null,
-      os: req.deviceInfo?.os ?? null,
-      browser: req.deviceInfo?.browser ?? null,
-      ipAddress: req.deviceInfo?.ipAddress ?? null,
-    });
+    const hashedRefreshToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
 
     res.clearCookie("tempToken", cookieOptions);
 
-    return res
+    res
       .cookie("refreshToken", refreshToken, {
         ...cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -304,30 +278,58 @@ const sessionId = crypto.randomUUID();
       .json({
         success: true,
         msg: "User login successfully",
-       user: {
+        user: {
           id: existingUser.id,
           name: existingUser.name,
           email: existingUser.email,
           isAccountVerified: existingUser.isAccountVerified,
-          isTwoFactorEnabled : existingUser.is2fa,
-          lastLoginAt : existingUser.lastLoginAt,
-          createdAt : existingUser.createdAt,
-          updatedAt : existingUser.updatedAt
+          isTwoFactorEnabled: existingUser.is2fa,
         },
         accessToken: accessToken,
       });
+
+    queueMicrotask(async () => {
+      const device = req.deviceInfo;
+      await db.insert(UserSessions).values({
+        id: sessionId,
+        userId: existingUser.id,
+        refreshToken: hashedRefreshToken,
+        isActive: true,
+
+        deviceName: req.deviceInfo?.deviceName ?? null,
+        deviceType: req.deviceInfo?.deviceType ?? null,
+        os: req.deviceInfo?.os ?? null,
+        browser: req.deviceInfo?.browser ?? null,
+        ipAddress: req.deviceInfo?.ipAddress ?? null,
+      });
+
+      await db
+        .update(Users)
+        .set({
+          lastLoginAt: new Date(),
+        })
+        .where(eq(Users.email, user.email));
+    });
   } catch (error: any) {
     console.error("Server error (2FA login error ) ", error.message);
     return res
       .status(500)
-      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
+      .json({
+        success: false,
+        msg:
+          process.env.NODE_ENV === "production"
+            ? "Something went wrong"
+            : error.message,
+      });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
   try {
     // #region region agent log
-    console.log(`[LOGOUT] IP: ${req.ip} - User-Agent: ${req.get('User-Agent')}`);
+    console.log(
+      `[LOGOUT] IP: ${req.ip} - User-Agent: ${req.get("User-Agent")}`
+    );
     // #endregion
     const { refreshToken, sid } = req.cookies || req.body;
 
@@ -370,6 +372,12 @@ export const logout = async (req: Request, res: Response) => {
     console.error(error.message);
     return res
       .status(500)
-      .json({ success: false, msg: process.env.NODE_ENV === 'production' ? 'Something went wrong' : error.message });
+      .json({
+        success: false,
+        msg:
+          process.env.NODE_ENV === "production"
+            ? "Something went wrong"
+            : error.message,
+      });
   }
 };

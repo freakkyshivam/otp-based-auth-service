@@ -1,0 +1,17 @@
+name: Keep Backend & Neon DB Warm
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"   # every 1 minute
+  workflow_dispatch:
+
+jobs:
+  keep-warm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          curl -L --silent --show-error --fail \
+          https://otp-based-auth-system.onrender.com/api/v1/health \
+          > /dev/null

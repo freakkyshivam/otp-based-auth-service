@@ -8,7 +8,7 @@
 import axios,{AxiosError} from 'axios'
 import {logoutPure} from '@/utils/logout'
  
- 
+   const token = localStorage.getItem("accessToken");
 
 type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
  
@@ -19,7 +19,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -193,7 +193,12 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Revoke Session API called', { sid, userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.post('/api/v1/users/sessions/revoke',{sid})
+    const {data} = await api.post('/api/v1/users/sessions/revoke',{sid},{
+      withCredentials : true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
+    })
 
     return data;
   } catch (error : unknown) {
@@ -215,7 +220,10 @@ export const logoutApi = async ()=>{
     // #endregion
 
     await api.post('/api/v1/users/sessions/terminate-others',{},{
-      withCredentials : true
+      withCredentials : true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
     })
     
    } catch (error : unknown) {
@@ -237,7 +245,10 @@ export const logoutApi = async ()=>{
     // #endregion
 
    const {data} = await api.post('/api/v1/auth/mfa/setup',{},{
-      withCredentials : true
+      withCredentials : true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
     })
     return data;
    } catch (error : unknown) {
@@ -260,10 +271,11 @@ export const logoutApi = async ()=>{
     
     const {data} = await api.post('/api/v1/auth/mfa/verify',{otp},
       {
-        withCredentials:true
+        withCredentials:true,
+         headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
     },
-   
-   
     
   )
 
@@ -286,13 +298,13 @@ export const logoutApi = async ()=>{
     // #region region agent log
     console.log('[DEBUG] Verify 2FA Login API called', { type, userAgent: navigator.userAgent });
     // #endregion
-    const token = localStorage.getItem("tempToken")
+    const tempToken = localStorage.getItem("tempToken")
      
     const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/2fa/verify-login`,{code,type},{
       withCredentials:true,
        headers: {
       "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
+      Authorization: tempToken ? `Bearer ${tempToken}` : "",
     },
     })
 
@@ -317,7 +329,10 @@ export const logoutApi = async ()=>{
     // #endregion
 
     const {data} = await api.post('/api/v1/auth/mfa/disable',{password},{
-      withCredentials : true
+      withCredentials : true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
     })
  
 
@@ -342,7 +357,10 @@ export const logoutApi = async ()=>{
     // #endregion
 
     const {data} = await api.post('/api/v1/auth/mfa/generate-new-backup-codes',{password},{
-      withCredentials : true
+      withCredentials : true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
     })
 
 

@@ -6,13 +6,19 @@
   otherSessions: Session[];
 }
 
+  const token = localStorage.getItem("accessToken");
 
 export const UserInfoApi = async ():Promise<APIResponse<UserInfoData>>=>{
   try {
     // #region region agent log
     console.log('[DEBUG] UserInfo API called', { userAgent: navigator.userAgent });
     // #endregion
-    const {data} = await api.get('/api/v1/users/me')
+    const {data} = await api.get('/api/v1/users/me',{
+      withCredentials:true,
+       headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
+    })
     return data;
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
@@ -36,7 +42,11 @@ export const allSessions = async (): Promise<APIResponse<SessionsResponse>> => {
     // #endregion
     const { data } = await api.get<APIResponse<SessionsResponse>>(
       "/api/v1/users/sessions",
-      { withCredentials: true }
+      { withCredentials: true,
+        headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
+       }
     );
  
     
@@ -62,7 +72,11 @@ export const updatePasswordApi = async (password:string, newPassword:string) => 
     const { data } = await api.post(
       "/api/v1/users/update-password",
       {password,newPassword},
-      { withCredentials: true }
+      { withCredentials: true,
+         headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
+       }
     );
 
 
@@ -88,7 +102,11 @@ export const updateProfileApi = async (name: string) => {
     const { data } = await api.put(
       "/api/v1/users/update-profile",
       { name },
-      { withCredentials: true }
+      { withCredentials: true,
+         headers : {
+          "Authorization" : token ?  `Bearer ${token}` : ""
+        }
+       }
     );
 
     return data;

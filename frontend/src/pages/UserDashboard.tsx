@@ -18,7 +18,7 @@ const UserDashboard = () => {
   const user = useAuth() || getLocalUser();
   const navigate = useNavigate();
   if(!user){
-    return navigate('/login')
+     navigate('/login')
   }
 
   return (
